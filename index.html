@@ -22,7 +22,7 @@
 </head>
 <body id="page-body" class="hero-bg text-white min-h-screen flex items-center justify-center p-4 transition-colors duration-300">
 
-    <!-- تم جعل الكارد شفاف تماماً مع زجاج خفيف ليظهر صورتك وخلفيتك بوضوح تام -->
+    <!-- الكارد الشفاف بالكامل مع زجاج خفيف ليظهر صورتك وخلفيتك بوضوح تام -->
     <div id="main-card" class="bg-white/10 dark:bg-slate-950/20 text-gray-900 dark:text-white p-6 md:p-8 rounded-3xl shadow-2xl w-full max-w-5xl text-center space-y-6 backdrop-blur-md border border-white/20 dark:border-slate-700/30 transition-colors duration-300">
         
         <!-- رأس الصفحة -->
@@ -260,6 +260,7 @@
                 { facingMode: "environment" },
                 { fps: 10, qrbox: 200 },
                 (decodedText) => {
+                    // [تم التعديل هنا] تنظيف الكود الممسوح من المسافات الزائدة وتوحيد الحروف الكبيرة لقبوله فوراً
                     const code = decodedText.trim().toUpperCase();
                     const student = students.find(s => s.code.toUpperCase() === code);
                     if (student) {
@@ -269,7 +270,7 @@
                         loadStudentPortalData();
                         alert("✅ تم قراءة الكارنيه بنجاح: " + student.name);
                     } else {
-                        alert("❌ الكود الممسوح غير مسجل لدى مستر يسر!");
+                        alert("❌ الكود الممسوح (" + code + ") غير مسجل لدى مستر يسر! تأكد من إضافة الطالب في لوحة المشرف أولاً.");
                     }
                 },
                 (err) => {}
@@ -288,11 +289,11 @@
 
             document.getElementById('student-portal-details').classList.remove('hidden');
 
-            let mySubs = subscriptions.filter(s => s.code === student.code);
+            let mySubs = subscriptions.filter(s => s.code.toUpperCase() === student.code.toUpperCase());
             let totalPaid = 0;
             mySubs.forEach(s => totalPaid += s.amount);
 
-            let myDues = studentDues.filter(d => d.code === student.code || d.code === "ALL");
+            let myDues = studentDues.filter(d => d.code.toUpperCase() === student.code.toUpperCase() || d.code === "ALL");
             let totalDue = 0;
             myDues.forEach(d => totalDue += d.amount);
 
@@ -325,7 +326,7 @@
             const badgeBox = document.getElementById('portal-fin-badge');
             badgeBox.innerHTML = `<span class="bg-emerald-900/80 text-emerald-200 px-2.5 py-1 rounded-lg text-xs font-bold border border-emerald-500/30">إجمالي المدفوع (${totalPaid}ج)</span>`;
 
-            let myAtt = approvedAttendance.filter(a => a.code === student.code);
+            let myAtt = approvedAttendance.filter(a => a.code.toUpperCase() === student.code.toUpperCase());
             document.getElementById('portal-att-count').innerText = `${myAtt.length} حصة`;
 
             updateStudentPendingView(student.code);
@@ -336,8 +337,8 @@
 
         function updateStudentPendingView(code) {
             const box = document.getElementById('student-pending-status-box');
-            let pendingAttObj = pendingAttendance.find(a => a.code === code);
-            let pendingPayList = pendingPayments.filter(p => p.code === code);
+            let pendingAttObj = pendingAttendance.find(a => a.code.toUpperCase() === code.toUpperCase());
+            let pendingPayList = pendingPayments.filter(p => p.code.toUpperCase() === code.toUpperCase());
 
             let html = "";
             if (pendingAttObj) {
@@ -367,8 +368,8 @@
             }
 
             const todayStr = new Date().toLocaleDateString('ar-EG');
-            const alreadyAttended = approvedAttendance.some(a => a.code === student.code && a.date.includes(todayStr));
-            const alreadyPending = pendingAttendance.some(a => a.code === student.code);
+            const alreadyAttended = approvedAttendance.some(a => a.code.toUpperCase() === student.code.toUpperCase() && a.date.includes(todayStr));
+            const alreadyPending = pendingAttendance.some(a => a.code.toUpperCase() === student.code.toUpperCase());
 
             if(alreadyAttended) {
                 alertBox.innerHTML = `<div class="p-2.5 bg-blue-900/80 text-blue-200 rounded-xl text-xs font-bold">ℹ️ تم قبول حضورك مسبقاً اليوم.</div>`;
@@ -628,7 +629,7 @@
             loadAdminPendingLists();
             renderFinancialSummary();
 
-            let st = students.find(s => s.code === item.code);
+            let st = students.find(s => s.code.toUpperCase() === item.code.toUpperCase());
             if (st && st.phone && st.phone !== "غير محدد") {
                 let cleanPhone = st.phone.startsWith('0') ? '2' + st.phone : st.phone;
                 let msg = encodeURIComponent(`أهلاً بك يا ${item.name}، تم قبول سداد مصروفات (${item.subject} - شهر ${item.month}) بقيمة ${item.amount} ج.م بنجاح من مستر يسر الموافي.`);
@@ -795,7 +796,7 @@
         }
 
         function editStudent(code) {
-            let st = students.find(s => s.code === code);
+            let st = students.find(s => s.code.toUpperCase() === code.toUpperCase());
             if(!st) return;
             const newName = prompt("تعديل اسم الطالب:", st.name);
             const newPhone = prompt("تعديل رقم الهاتف:", st.phone);
@@ -807,7 +808,7 @@
         }
 
         function toggleStudentStatus(code) {
-            let st = students.find(s => s.code === code);
+            let st = students.find(s => s.code.toUpperCase() === code.toUpperCase());
             if (st) {
                 st.active = (st.active === false ? true : false);
                 saveLocal();
@@ -817,7 +818,7 @@
 
         function deleteStudent(code) {
             if (confirm("هل أنت متأكد من حذف هذا الطالب نهائياً؟")) {
-                students = students.filter(s => s.code !== code);
+                students = students.filter(s => s.code.toUpperCase() !== code.toUpperCase());
                 saveLocal();
                 renderAdminStudentsTable();
             }
