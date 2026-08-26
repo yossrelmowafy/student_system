@@ -64,7 +64,7 @@
         let approvedAttendance = JSON.parse(localStorage.getItem('yossr_approved_att')) || [];
         let pendingPayments = JSON.parse(localStorage.getItem('yossr_pending_pay')) || [];
         let subscriptions = JSON.parse(localStorage.getItem('yossr_subscriptions')) || [];
-        let studentDues = JSON.parse(localStorage.getItem('yossr_student_dues')) || []; // المصروفات المطلوبة على الطلاب
+        let studentDues = JSON.parse(localStorage.getItem('yossr_student_dues')) || []; 
         let expenses = JSON.parse(localStorage.getItem('yossr_expenses')) || [];
         
         let schedules = JSON.parse(localStorage.getItem('yossr_schedules')) || [
@@ -298,7 +298,6 @@
             let totalDue = 0;
             myDues.forEach(d => totalDue += d.amount);
 
-            // حساب المتبقي عليه
             let remainingDue = totalDue - totalPaid;
             const alertBanner = document.getElementById('portal-financial-alert-banner');
 
@@ -309,7 +308,7 @@
                             <i class="fa-solid fa-triangle-exclamation text-rose-600 text-base"></i>
                             <div>
                                 <span class="font-bold text-rose-800 dark:text-rose-300 block">تنبيه مالي مهم:</span>
-                                <span class="text-rose-700 dark:text-rose-400">عليك مصروفات مستحقة بقيمة <b class="font-black underline">${remainingDue} ج.م</b>، يرجى سرعة سدادها في أقرب وقت.</span>
+                                <span class="text-rose-700 dark:text-rose-400">عليك مصروفات مستحقة بقيمة <b class="font-black underline">${remainingDue} ج.م</b>، يرجى سرعة سدادها.</span>
                             </div>
                         </div>
                     </div>
@@ -389,7 +388,7 @@
         }
 
         function requestPaymentApproval() {
-            const code = document.getElementById('portal-code-input'].value.trim().toUpperCase();
+            const code = document.getElementById('portal-code-input').value.trim().toUpperCase();
             const subject = document.getElementById('pay-subject').value;
             const month = document.getElementById('pay-month').value;
             const amount = parseFloat(document.getElementById('pay-amount').value) || 0;
