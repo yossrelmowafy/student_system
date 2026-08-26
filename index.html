@@ -13,7 +13,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
        .hero-bg {
-            background: linear-gradient(rgba(15, 23, 42, 0.6), rgba(15, 23, 42, 0.7)), url('https://raw.githubusercontent.com/yossrelmowafy/student_system/main/bg.jpg');
+            background: linear-gradient(rgba(15, 23, 42, 0.55), rgba(15, 23, 42, 0.65)), url('https://raw.githubusercontent.com/yossrelmowafy/student_system/main/bg.jpg');
             background-size: cover;
             background-position: center;
             background-attachment: fixed;
@@ -40,7 +40,7 @@
             <button onclick="switchMode('student')" id="btn-mode-student" class="flex-1 bg-blue-600 text-white py-3.5 rounded-2xl font-bold transition shadow-lg text-sm flex items-center justify-center gap-2">
                 <i class="fa-solid fa-graduation-cap"></i> بوابة الطالب الذكية
             </button>
-            <button onclick="switchMode('admin')" id="btn-mode-admin" class="flex-1 bg-gray-100 dark:bg-slate-800 text-gray-700 dark:text-gray-200 py-3.5 rounded-2xl font-bold transition shadow-lg text-sm flex items-center justify-center gap-2">
+            <button onclick="requestAdminAccess()" id="btn-mode-admin" class="flex-1 bg-gray-100 dark:bg-slate-800 text-gray-700 dark:text-gray-200 py-3.5 rounded-2xl font-bold transition shadow-lg text-sm flex items-center justify-center gap-2">
                 <i class="fa-solid fa-user-shield"></i> لوحة تحكم المشرف الشاملة
             </button>
         </div>
@@ -71,7 +71,6 @@
             { subject: "إدارة الأعمال", days: "الأحد والثلاثاء", time: "4:00 عصراً" }
         ];
 
-        let isAdminAuthenticated = false;
         let isDarkMode = localStorage.getItem('yossr_dark_mode') === 'true';
         if (isDarkMode) { applyDarkMode(true); }
 
@@ -136,41 +135,16 @@
             } else if (mode === 'admin') {
                 adminBtn.className = "flex-1 bg-blue-600 text-white py-3.5 rounded-2xl font-bold transition shadow-lg text-sm flex items-center justify-center gap-2";
                 studentBtn.className = "flex-1 bg-gray-100 dark:bg-slate-800 text-gray-700 dark:text-gray-200 py-3.5 rounded-2xl font-bold transition shadow-lg text-sm flex items-center justify-center gap-2";
-                
-                if (!isAdminAuthenticated) {
-                    renderAdminLoginView();
-                } else {
-                    renderAdminView();
-                }
+                renderAdminView();
             }
         }
 
-        // ================= شاشة تسجيل دخول المشرف =================
-        function renderAdminLoginView() {
-            const container = document.getElementById('main-container');
-            container.innerHTML = `
-                <div class="space-y-4 max-w-md mx-auto py-6 text-right">
-                    <div class="bg-slate-50 dark:bg-slate-800/80 p-6 rounded-2xl border dark:border-slate-700 space-y-4 shadow-inner text-center">
-                        <div class="w-12 h-12 bg-blue-500/10 dark:bg-blue-500/20 text-blue-600 dark:text-blue-400 rounded-2xl flex items-center justify-center mx-auto text-xl">
-                            <i class="fa-solid fa-lock"></i>
-                        </div>
-                        <h3 class="font-bold text-sm text-gray-900 dark:text-white">بوابة المشرف - تتطلب كلمة المرور</h3>
-                        <input type="password" id="admin-password-input" placeholder="أدخل كلمة مرور المشرف" class="w-full px-4 py-3 border rounded-xl text-xs text-center font-bold bg-white dark:bg-slate-900 text-black dark:text-white border-slate-300 dark:border-slate-700 focus:outline-none focus:border-blue-500">
-                        <button onclick="verifyAdminPassword()" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-xl font-bold text-xs shadow transition flex items-center justify-center gap-2">
-                            <i class="fa-solid fa-arrow-left"></i> دخول لوحة التحكم
-                        </button>
-                    </div>
-                </div>
-            `;
-        }
-
-        function verifyAdminPassword() {
-            const pass = document.getElementById('admin-password-input').value;
+        function requestAdminAccess() {
+            const pass = prompt("الرجاء إدخال كلمة مرور المشرف:");
             if (pass === "23122002YY") {
-                isAdminAuthenticated = true;
-                renderAdminView();
-            } else {
-                alert("❌ كلمة المرور غير صحيحة!");
+                switchMode('admin');
+            } else if (pass !== null) {
+                alert("كلمة المرور غير صحيحة!");
             }
         }
 
@@ -416,11 +390,6 @@
             const container = document.getElementById('main-container');
             container.innerHTML = `
                 <div class="space-y-6 text-right">
-                    <div class="flex justify-between items-center bg-slate-50 dark:bg-slate-800/80 p-3 rounded-2xl border dark:border-slate-700">
-                        <span class="font-bold text-xs text-emerald-600 dark:text-emerald-400"><i class="fa-solid fa-circle-check ml-1"></i> أهلاً بك يا مستر يسر في لوحة التحكم</span>
-                        <button onclick="isAdminAuthenticated = false; renderAdminLoginView();" class="bg-rose-500 hover:bg-rose-600 text-white px-3 py-1.5 rounded-xl text-[11px] font-bold transition">قفل اللوحة (تسجيل خروج)</button>
-                    </div>
-
                     <!-- لوحة المؤشرات السريعة -->
                     <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
                         <div class="bg-blue-50 dark:bg-slate-800 p-4 rounded-2xl border dark:border-slate-700 shadow-sm text-center">
@@ -489,10 +458,30 @@
                             </table>
                         </div>
                     </div>
+
+                    <!-- قسم إدارة المصروفات والإيرادات المالية -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="bg-slate-50 dark:bg-slate-800/80 p-5 rounded-2xl border dark:border-slate-700 space-y-3">
+                            <h3 class="font-bold text-xs text-emerald-700 dark:text-emerald-400"><i class="fa-solid fa-wallet ml-1"></i> تسجيل مصروفات السنتر أو المذكرات:</h3>
+                            <div class="space-y-2">
+                                <input type="text" id="expense-title" placeholder="بند المصروف (مثال: طباعة مذكرات، إيجار)" class="w-full px-3 py-2.5 border rounded-xl text-xs bg-white dark:bg-slate-900 text-black dark:text-white border-slate-300 dark:border-slate-700">
+                                <input type="number" id="expense-amount" placeholder="المبلغ (ج)" class="w-full px-3 py-2.5 border rounded-xl text-xs bg-white dark:bg-slate-900 text-black dark:text-white border-slate-300 dark:border-slate-700">
+                                <button onclick="addExpense()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-2.5 rounded-xl font-bold text-xs shadow transition">إضافة المصروف</button>
+                            </div>
+                        </div>
+
+                        <div class="bg-slate-50 dark:bg-slate-800/80 p-5 rounded-2xl border dark:border-slate-700 space-y-3">
+                            <h3 class="font-bold text-xs text-blue-700 dark:text-blue-400"><i class="fa-solid fa-chart-line ml-1"></i> الخزينة والملخص المالي:</h3>
+                            <div id="financial-summary-box" class="text-xs space-y-2 text-gray-700 dark:text-gray-300">
+                                <!-- يتم تحديثه برمجياً -->
+                            </div>
+                        </div>
+                    </div>
                 </div>
             `;
             loadAdminPendingLists();
             renderAdminStudentsTable();
+            renderFinancialSummary();
         }
 
         function loadAdminPendingLists() {
@@ -559,16 +548,58 @@
 
         function approvePayment(index) {
             let item = pendingPayments.splice(index, 1)[0];
-            subscriptions.push({ code: item.code, subject: item.subject, month: item.month, remaining: 0, date: new Date().toLocaleDateString('ar-EG') });
+            subscriptions.push({ code: item.code, subject: item.subject, month: item.month, amount: item.amount, date: new Date().toLocaleDateString('ar-EG') });
             saveLocal();
             playSuccessSound();
             loadAdminPendingLists();
+            renderFinancialSummary();
         }
 
         function rejectPayment(index) {
             pendingPayments.splice(index, 1);
             saveLocal();
             loadAdminPendingLists();
+        }
+
+        function addExpense() {
+            const title = document.getElementById('expense-title').value.trim();
+            const amount = parseFloat(document.getElementById('expense-amount').value) || 0;
+            if (!title || amount <= 0) { alert("أدخل بيانات المصروف بشكل صحيح!"); return; }
+
+            expenses.push({ title, amount, date: new Date().toLocaleDateString('ar-EG') });
+            saveLocal();
+            document.getElementById('expense-title').value = '';
+            document.getElementById('expense-amount').value = '';
+            renderFinancialSummary();
+            alert("✅ تم تسجيل المصروف بنجاح");
+        }
+
+        function renderFinancialSummary() {
+            const box = document.getElementById('financial-summary-box');
+            if (!box) return;
+
+            let totalIncome = 0;
+            subscriptions.forEach(s => totalIncome += (s.amount || 0));
+
+            let totalExpenses = 0;
+            expenses.forEach(e => totalExpenses += (e.amount || 0));
+
+            let netProfit = totalIncome - totalExpenses;
+
+            box.innerHTML = `
+                <div class="flex justify-between p-2.5 bg-white dark:bg-slate-900 rounded-xl border dark:border-slate-700">
+                    <span>إجمالي الإيرادات المحصلة:</span>
+                    <span class="font-bold text-emerald-600">${totalIncome} ج.م</span>
+                </div>
+                <div class="flex justify-between p-2.5 bg-white dark:bg-slate-900 rounded-xl border dark:border-slate-700">
+                    <span>إجمالي المصروفات والطباعة:</span>
+                    <span class="font-bold text-rose-600">${totalExpenses} ج.م</span>
+                </div>
+                <div class="flex justify-between p-2.5 bg-blue-50 dark:bg-slate-900 rounded-xl border border-blue-200 dark:border-slate-700 font-bold">
+                    <span>صافي الخزينة:</span>
+                    <span class="text-blue-600 dark:text-blue-400">${netProfit} ج.م</span>
+                </div>
+            `;
         }
 
         function addNewStudent() {
