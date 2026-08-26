@@ -22,7 +22,6 @@
 </head>
 <body id="page-body" class="hero-bg text-white min-h-screen flex items-center justify-center p-4 transition-colors duration-300">
 
-    <!-- الكارد الشفاف بالكامل مع زجاج خفيف ليظهر صورتك وخلفيتك بوضوح تام -->
     <div id="main-card" class="bg-white/10 dark:bg-slate-950/20 text-gray-900 dark:text-white p-6 md:p-8 rounded-3xl shadow-2xl w-full max-w-5xl text-center space-y-6 backdrop-blur-md border border-white/20 dark:border-slate-700/30 transition-colors duration-300">
         
         <!-- رأس الصفحة -->
@@ -260,9 +259,13 @@
                 { facingMode: "environment" },
                 { fps: 10, qrbox: 200 },
                 (decodedText) => {
-                    // [تم التعديل هنا] تنظيف الكود الممسوح من المسافات الزائدة وتوحيد الحروف الكبيرة لقبوله فوراً
-                    const code = decodedText.trim().toUpperCase();
-                    const student = students.find(s => s.code.toUpperCase() === code);
+                    // تنظيف الكود الممسوح تلقائياً من أي مسافات أو رموز زائدة
+                    const rawCode = decodedText.trim();
+                    // استخراج الكود بغض النظر عن الـ URL لو الـ QR فيه لينك
+                    const parts = rawCode.split('/');
+                    const cleanCode = parts[parts.length - 1].trim().toUpperCase();
+
+                    const student = students.find(s => s.code.toUpperCase() === cleanCode);
                     if (student) {
                         playSuccessSound();
                         document.getElementById('portal-code-input').value = student.code;
@@ -270,7 +273,7 @@
                         loadStudentPortalData();
                         alert("✅ تم قراءة الكارنيه بنجاح: " + student.name);
                     } else {
-                        alert("❌ الكود الممسوح (" + code + ") غير مسجل لدى مستر يسر! تأكد من إضافة الطالب في لوحة المشرف أولاً.");
+                        alert("❌ الكود الممسوح (" + rawCode + ") غير مسجل لدى مستر يسر! تأكد من إضافة الطالب في لوحة المشرف.");
                     }
                 },
                 (err) => {}
