@@ -13,10 +13,16 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
        .hero-bg {
-            background: linear-gradient(rgba(15, 23, 42, 0.55), rgba(15, 23, 42, 0.65)), url('https://raw.githubusercontent.com/yossrelmowafy/student_system/main/bg.jpg');
-            background-size: cover;
-            background-position: center;
+            background: linear-gradient(rgba(15, 23, 42, 0.45), rgba(15, 23, 42, 0.60)), url('https://raw.githubusercontent.com/yossrelmowafy/student_system/main/bg.jpg');
+            background-size: 100% auto;
+            background-position: center 25%;
             background-attachment: fixed;
+        }
+        @media (max-width: 768px) {
+            .hero-bg {
+                background-size: cover;
+                background-position: center 20%;
+            }
         }
     </style>
 </head>
@@ -28,7 +34,7 @@
         <div class="flex justify-between items-center border-b pb-4 border-slate-200 dark:border-slate-800">
             <div class="text-right">
                 <h2 class="text-2xl font-black text-blue-600 dark:text-blue-400 tracking-wider">مستر يسر الموافي</h2>
-                <p class="text-xs text-gray-500 dark:text-gray-400 font-bold mt-1">نظام إدارة المحاسبة وإدارة الأعمال - نظام البكالوريا (دفعة 2027)</p>
+                <p class="text-xs text-gray-500 dark:text-gray-400 font-bold mt-1">نظام المحاسبة وإدارة الأعمال - نظام البكالوريا (دفعة 2027)</p>
             </div>
             <button onclick="toggleDarkMode()" class="bg-gray-100 dark:bg-slate-800 p-2.5 rounded-2xl text-xl transition shadow hover:scale-105" title="تبديل الوضع الليلي">
                 <span id="theme-icon">🌙</span>
@@ -183,7 +189,6 @@
                     </div>
 
                     <div id="student-portal-details" class="hidden space-y-4">
-                        <!-- قسم التنبيه المالي والموقف -->
                         <div id="portal-financial-alert-banner"></div>
 
                         <div class="grid grid-cols-2 gap-3">
@@ -629,6 +634,14 @@
             playSuccessSound();
             loadAdminPendingLists();
             renderFinancialSummary();
+
+            // إرسال رسالة واتساب للطالب بقبول السداد تلقائياً
+            let st = students.find(s => s.code === item.code);
+            if (st && st.phone && st.phone !== "غير محدد") {
+                let cleanPhone = st.phone.startsWith('0') ? '2' + st.phone : st.phone;
+                let msg = encodeURIComponent(`أهلاً بك يا ${item.name}، تم قبول سداد مصروفات (${item.subject} - شهر ${item.month}) بقيمة ${item.amount} ج.م بنجاح من مستر يسر الموافي.`);
+                window.open(`https://wa.me/${cleanPhone}?text=${msg}`, '_blank');
+            }
         }
 
         function rejectPayment(index) {
@@ -759,6 +772,13 @@
 
             let html = '';
             filtered.forEach((st) => {
+                let waBtn = '';
+                if (st.phone && st.phone !== "غير محدد") {
+                    let cleanPhone = st.phone.startsWith('0') ? '2' + st.phone : st.phone;
+                    let msg = encodeURIComponent(`أهلاً بك يا ${st.name} من مستر يسر الموافي (نظام المحاسبة وإدارة الأعمال).`);
+                    waBtn = `<a href="https://wa.me/${cleanPhone}?text=${msg}" target="_blank" class="bg-emerald-600 hover:bg-emerald-700 text-white px-2 py-1 rounded-lg text-[10px] font-bold inline-flex items-center gap-1" title="مراسلة واتساب"><i class="fa-brands fa-whatsapp"></i> واتس</a>`;
+                }
+
                 html += `
                     <tr class="hover:bg-gray-50 dark:hover:bg-slate-900/50">
                         <td class="p-2.5 font-mono font-bold text-blue-600 dark:text-blue-400">${st.code}</td>
@@ -770,6 +790,7 @@
                             </span>
                         </td>
                         <td class="p-2.5 text-center space-x-1 space-x-reverse">
+                            ${waBtn}
                             <button onclick="printStudentCard('${st.name}', '${st.code}')" class="bg-sky-600 hover:bg-sky-700 text-white px-2 py-1 rounded-lg text-[10px] font-bold" title="طباعة الكارنيه"><i class="fa-solid fa-id-card"></i></button>
                             <button onclick="editStudent('${st.code}')" class="bg-blue-600 hover:bg-blue-700 text-white px-2 py-1 rounded-lg text-[10px] font-bold" title="تعديل البيانات"><i class="fa-solid fa-pen"></i></button>
                             <button onclick="toggleStudentStatus('${st.code}')" class="bg-amber-600 hover:bg-amber-700 text-white px-2 py-1 rounded-lg text-[10px] font-bold" title="تبديل الحالة">تبديل</button>
@@ -821,7 +842,7 @@
             printArea.innerHTML = `
                 <div style="direction: rtl; padding: 30px; font-family: Tahoma, sans-serif; color: #000;">
                     <h2 style="text-align: center; color: #1e3a8a; margin-bottom: 5px;">مستر يسر الموافي - تقرير الحسابات المالية</h2>
-                    <p style="text-align: center; font-size: 12px; color: #555; margin-bottom: 25px;">نظام إدارة المحاسبة وإدارة الأعمال - البكالوريا</p>
+                    <p style="text-align: center; font-size: 12px; color: #555; margin-bottom: 25px;">نظام المحاسبة وإدارة الأعمال - البكالوريا</p>
                     <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 14px;">
                         <tr style="background: #f3f4f6;"><th style="border: 1px solid #ddd; padding: 10px;">البيان المالي</th><th style="border: 1px solid #ddd; padding: 10px;">القيمة</th></tr>
                         <tr><td style="border: 1px solid #ddd; padding: 10px;">إجمالي إيرادات الاشتراكات</td><td style="border: 1px solid #ddd; padding: 10px; color: green; font-weight: bold;">${totalIncome} ج.م</td></tr>
