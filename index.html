@@ -28,7 +28,7 @@
         <div class="flex justify-between items-center border-b pb-4 border-slate-200 dark:border-slate-800">
             <div class="text-right">
                 <h2 class="text-2xl font-black text-blue-600 dark:text-blue-400 tracking-wider">مستر يسر الموافي</h2>
-                <p class="text-xs text-gray-500 dark:text-gray-400 font-bold mt-1">نظام إدارة المحاسبة وإدارة الأعمال - نظام البكالوريا (دفعة 2027)</p>
+                <p class="text-xs text-gray-500 dark:text-gray-400 font-bold mt-1">نظام المحاسبة وإدارة الأعمال - نظام البكالوريا (دفعة 2027)</p>
             </div>
             <button onclick="toggleDarkMode()" class="bg-gray-100 dark:bg-slate-800 p-2.5 rounded-2xl text-xl transition shadow hover:scale-105" title="تبديل الوضع الليلي">
                 <span id="theme-icon">🌙</span>
@@ -64,6 +64,7 @@
         let approvedAttendance = JSON.parse(localStorage.getItem('yossr_approved_att')) || [];
         let pendingPayments = JSON.parse(localStorage.getItem('yossr_pending_pay')) || [];
         let subscriptions = JSON.parse(localStorage.getItem('yossr_subscriptions')) || [];
+        let studentDues = JSON.parse(localStorage.getItem('yossr_student_dues')) || []; // المصروفات المطلوبة على الطلاب
         let expenses = JSON.parse(localStorage.getItem('yossr_expenses')) || [];
         
         let schedules = JSON.parse(localStorage.getItem('yossr_schedules')) || [
@@ -119,6 +120,7 @@
             localStorage.setItem('yossr_approved_att', JSON.stringify(approvedAttendance));
             localStorage.setItem('yossr_pending_pay', JSON.stringify(pendingPayments));
             localStorage.setItem('yossr_subscriptions', JSON.stringify(subscriptions));
+            localStorage.setItem('yossr_student_dues', JSON.stringify(studentDues));
             localStorage.setItem('yossr_expenses', JSON.stringify(expenses));
             localStorage.setItem('yossr_schedules', JSON.stringify(schedules));
         }
@@ -181,9 +183,12 @@
                     </div>
 
                     <div id="student-portal-details" class="hidden space-y-4">
+                        <!-- قسم التنبيه المالي والموقف -->
+                        <div id="portal-financial-alert-banner"></div>
+
                         <div class="grid grid-cols-2 gap-3">
                             <div class="bg-white dark:bg-slate-800 p-4 rounded-2xl border dark:border-slate-700 shadow-sm">
-                                <span class="text-[11px] text-gray-500 block mb-1">الموقف المالي:</span>
+                                <span class="text-[11px] text-gray-500 block mb-1">المدفوعات المسجلة:</span>
                                 <div id="portal-fin-badge"></div>
                             </div>
                             <div class="bg-white dark:bg-slate-800 p-4 rounded-2xl border dark:border-slate-700 shadow-sm">
@@ -193,7 +198,7 @@
                         </div>
 
                         <div class="bg-emerald-50/70 dark:bg-slate-800/70 p-4 rounded-2xl border border-emerald-200 dark:border-slate-700 space-y-3">
-                            <h3 class="font-bold text-xs text-emerald-900 dark:text-emerald-300">تسجيل حضور حصة اليوم:</h3>
+                            <h3 class="font-bold text-xs text-emerald-900 dark:text-emerald-300">تسجيل حضور حصة اليوم (متاح دائماً):</h3>
                             <button onclick="requestAttendanceApproval()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-3 rounded-xl font-bold text-xs shadow transition flex items-center justify-center gap-2">
                                 <i class="fa-solid fa-check-circle"></i> إرسال طلب تسجيل الحضور للمشرف
                             </button>
@@ -289,6 +294,37 @@
             let totalPaid = 0;
             mySubs.forEach(s => totalPaid += s.amount);
 
+            let myDues = studentDues.filter(d => d.code === student.code || d.code === "ALL");
+            let totalDue = 0;
+            myDues.forEach(d => totalDue += d.amount);
+
+            // حساب المتبقي عليه
+            let remainingDue = totalDue - totalPaid;
+            const alertBanner = document.getElementById('portal-financial-alert-banner');
+
+            if (remainingDue > 0) {
+                alertBanner.innerHTML = `
+                    <div class="bg-rose-50 dark:bg-rose-950/50 border border-rose-300 dark:border-rose-800 p-3.5 rounded-2xl flex items-center justify-between text-xs shadow-sm">
+                        <div class="flex items-center gap-2">
+                            <i class="fa-solid fa-triangle-exclamation text-rose-600 text-base"></i>
+                            <div>
+                                <span class="font-bold text-rose-800 dark:text-rose-300 block">تنبيه مالي مهم:</span>
+                                <span class="text-rose-700 dark:text-rose-400">عليك مصروفات مستحقة بقيمة <b class="font-black underline">${remainingDue} ج.م</b>، يرجى سرعة سدادها في أقرب وقت.</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            } else {
+                alertBanner.innerHTML = `
+                    <div class="bg-emerald-50 dark:bg-emerald-950/50 border border-emerald-300 dark:border-emerald-800 p-3.5 rounded-2xl flex items-center justify-between text-xs shadow-sm">
+                        <div class="flex items-center gap-2">
+                            <i class="fa-solid fa-circle-check text-emerald-600 text-base"></i>
+                            <span class="font-bold text-emerald-800 dark:text-emerald-300">حسابك ماليًا مستقر ولا توجد مصروفات متأخرة عليك حالياً.</span>
+                        </div>
+                    </div>
+                `;
+            }
+
             const badgeBox = document.getElementById('portal-fin-badge');
             badgeBox.innerHTML = `<span class="bg-emerald-100 text-emerald-800 dark:bg-emerald-900/60 dark:text-emerald-200 px-2.5 py-1 rounded-lg text-xs font-bold">إجمالي المدفوع (${totalPaid}ج)</span>`;
 
@@ -353,7 +389,7 @@
         }
 
         function requestPaymentApproval() {
-            const code = document.getElementById('portal-code-input').value.trim().toUpperCase();
+            const code = document.getElementById('portal-code-input'].value.trim().toUpperCase();
             const subject = document.getElementById('pay-subject').value;
             const month = document.getElementById('pay-month').value;
             const amount = parseFloat(document.getElementById('pay-amount').value) || 0;
@@ -384,6 +420,12 @@
         // ================= 2. لوحة تحكم المشرف الشاملة =================
         function renderAdminView() {
             const container = document.getElementById('main-container');
+
+            let studentOptionsHtml = `<option value="ALL">📢 فرض على جميع الطلاب (عام)</option>`;
+            students.forEach(st => {
+                studentOptionsHtml += `<option value="${st.code}">${st.name} (${st.code})</option>`;
+            });
+
             container.innerHTML = `
                 <div class="space-y-6 text-right">
                     <!-- لوحة المؤشرات السريعة -->
@@ -438,6 +480,19 @@
                         </div>
                     </div>
 
+                    <!-- قسم تحميل مصاريف الاشتراك على الطلاب -->
+                    <div class="bg-slate-50 dark:bg-slate-800/80 p-5 rounded-2xl border dark:border-slate-700 space-y-3">
+                        <h3 class="font-bold text-xs text-indigo-700 dark:text-indigo-400"><i class="fa-solid fa-file-invoice-dollar ml-1"></i> فرض وتحميل مصاريف الاشتراك الشهري أو المذكرة على الطلاب:</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-4 gap-2">
+                            <select id="due-student-code" class="px-3 py-2.5 border rounded-xl text-xs bg-white dark:bg-slate-900 text-black dark:text-white border-slate-300 dark:border-slate-700">
+                                ${studentOptionsHtml}
+                            </select>
+                            <input type="text" id="due-title" placeholder="بند المصروف (مثال: اشتراك شهر أكتوبر / مذكرة المحاسبة)" class="px-3 py-2.5 border rounded-xl text-xs bg-white dark:bg-slate-900 text-black dark:text-white border-slate-300 dark:border-slate-700">
+                            <input type="number" id="due-amount" placeholder="المبلغ المطلوب (ج)" class="px-3 py-2.5 border rounded-xl text-xs bg-white dark:bg-slate-900 text-black dark:text-white border-slate-300 dark:border-slate-700">
+                            <button onclick="addStudentDue()" class="bg-indigo-600 hover:bg-indigo-700 text-white py-2.5 rounded-xl font-bold text-xs shadow transition">تحميل المطالبة المالية</button>
+                        </div>
+                    </div>
+
                     <!-- إدارة مواعيد المجموعات -->
                     <div class="bg-slate-50 dark:bg-slate-800/80 p-5 rounded-2xl border dark:border-slate-700 space-y-3">
                         <h3 class="font-bold text-xs text-purple-700 dark:text-purple-400"><i class="fa-solid fa-calendar-days ml-1"></i> إدارة وتعديل مواعيد الحصص الأسبوعية:</h3>
@@ -482,10 +537,10 @@
                         </div>
                     </div>
 
-                    <!-- قسم إدارة المصروفات والإيرادات المالية -->
+                    <!-- قسم إدارة المصروفات وإيرادات الخزينة -->
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div class="bg-slate-50 dark:bg-slate-800/80 p-5 rounded-2xl border dark:border-slate-700 space-y-3">
-                            <h3 class="font-bold text-xs text-emerald-700 dark:text-emerald-400"><i class="fa-solid fa-wallet ml-1"></i> تسجيل مصروفات السنتر أو المذكرات:</h3>
+                            <h3 class="font-bold text-xs text-emerald-700 dark:text-emerald-400"><i class="fa-solid fa-wallet ml-1"></i> تسجيل مصروفات السنتر أو المذكرات التشغيلية:</h3>
                             <div class="space-y-2">
                                 <input type="text" id="expense-title" placeholder="بند المصروف (مثال: طباعة مذكرات، إيجار)" class="w-full px-3 py-2.5 border rounded-xl text-xs bg-white dark:bg-slate-900 text-black dark:text-white border-slate-300 dark:border-slate-700">
                                 <input type="number" id="expense-amount" placeholder="المبلغ (ج)" class="w-full px-3 py-2.5 border rounded-xl text-xs bg-white dark:bg-slate-900 text-black dark:text-white border-slate-300 dark:border-slate-700">
@@ -581,6 +636,20 @@
             pendingPayments.splice(index, 1);
             saveLocal();
             loadAdminPendingLists();
+        }
+
+        function addStudentDue() {
+            const code = document.getElementById('due-student-code').value;
+            const title = document.getElementById('due-title').value.trim();
+            const amount = parseFloat(document.getElementById('due-amount').value) || 0;
+
+            if (!title || amount <= 0) { alert("أدخل اسم البند ومبلغ صحيح!"); return; }
+
+            studentDues.push({ code, title, amount, date: new Date().toLocaleDateString('ar-EG') });
+            saveLocal();
+            document.getElementById('due-title').value = '';
+            document.getElementById('due-amount').value = '';
+            alert("✅ تم تحميل المطالبة المالية بنجاح على الطالب/الطلاب");
         }
 
         function addSchedule() {
@@ -819,6 +888,7 @@
                     approvedAttendance = [];
                     pendingPayments = [];
                     subscriptions = [];
+                    studentDues = [];
                     expenses = [];
                     schedules = [];
                     saveLocal();
