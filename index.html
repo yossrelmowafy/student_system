@@ -37,10 +37,10 @@
 
         <!-- أزرار الاختيار بين الوضعين -->
         <div id="mode-selector" class="flex gap-4 justify-center border-b pb-4 border-slate-200 dark:border-slate-800">
-            <button onclick="switchMode('student')" id="btn-mode-student" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-3.5 rounded-2xl font-bold transition shadow-lg text-sm flex items-center justify-center gap-2">
+            <button onclick="switchMode('student')" id="btn-mode-student" class="flex-1 bg-blue-600 text-white py-3.5 rounded-2xl font-bold transition shadow-lg text-sm flex items-center justify-center gap-2">
                 <i class="fa-solid fa-graduation-cap"></i> بوابة الطالب الذكية
             </button>
-            <button onclick="switchMode('admin')" id="btn-mode-admin" class="flex-1 bg-gray-100 dark:bg-slate-800 text-gray-700 dark:text-gray-200 py-3.5 rounded-2xl font-bold transition shadow-lg text-sm flex items-center justify-center gap-2">
+            <button onclick="requestAdminAccess()" id="btn-mode-admin" class="flex-1 bg-gray-100 dark:bg-slate-800 text-gray-700 dark:text-gray-200 py-3.5 rounded-2xl font-bold transition shadow-lg text-sm flex items-center justify-center gap-2">
                 <i class="fa-solid fa-user-shield"></i> لوحة تحكم المشرف الشاملة
             </button>
         </div>
@@ -73,6 +73,10 @@
 
         let isDarkMode = localStorage.getItem('yossr_dark_mode') === 'true';
         if (isDarkMode) { applyDarkMode(true); }
+
+        window.onload = function() {
+            renderStudentView();
+        }
 
         function playSuccessSound() {
             try {
@@ -129,20 +133,19 @@
                 adminBtn.className = "flex-1 bg-gray-100 dark:bg-slate-800 text-gray-700 dark:text-gray-200 py-3.5 rounded-2xl font-bold transition shadow-lg text-sm flex items-center justify-center gap-2";
                 renderStudentView();
             } else if (mode === 'admin') {
-                const pass = prompt("الرجاء إدخال كلمة مرور المشرف:");
-                if (pass === "23122002YY") {
-                    adminBtn.className = "flex-1 bg-blue-600 text-white py-3.5 rounded-2xl font-bold transition shadow-lg text-sm flex items-center justify-center gap-2";
-                    studentBtn.className = "flex-1 bg-gray-100 dark:bg-slate-800 text-gray-700 dark:text-gray-200 py-3.5 rounded-2xl font-bold transition shadow-lg text-sm flex items-center justify-center gap-2";
-                    renderAdminView();
-                } else {
-                    alert("كلمة المرور غير صحيحة!");
-                }
+                adminBtn.className = "flex-1 bg-blue-600 text-white py-3.5 rounded-2xl font-bold transition shadow-lg text-sm flex items-center justify-center gap-2";
+                studentBtn.className = "flex-1 bg-gray-100 dark:bg-slate-800 text-gray-700 dark:text-gray-200 py-3.5 rounded-2xl font-bold transition shadow-lg text-sm flex items-center justify-center gap-2";
+                renderAdminView();
             }
         }
 
-        // افتراضي عند فتح الصفحة تظهر بوابة الطالب
-        window.onload = function() {
-            renderStudentView();
+        function requestAdminAccess() {
+            const pass = prompt("الرجاء إدخال كلمة مرور المشرف:");
+            if (pass === "23122002YY") {
+                switchMode('admin');
+            } else if (pass !== null) {
+                alert("كلمة المرور غير صحيحة!");
+            }
         }
 
         // ================= 1. بوابة الطالب الذكية =================
@@ -376,7 +379,7 @@
         }
 
         function openStudentCard() {
-            const code = document.getElementById('portal-code-input'].value.trim().toUpperCase();
+            const code = document.getElementById('portal-code-input').value.trim().toUpperCase();
             const student = students.find(s => s.code.toUpperCase() === code);
             printStudentCard(student.name, student.code);
         }
@@ -463,6 +466,7 @@
 
         function loadAdminPendingLists() {
             const attBox = document.getElementById('admin-pending-att-list');
+            if (!attBox) return;
             if (pendingAttendance.length === 0) {
                 attBox.innerHTML = `<p class="text-gray-400 text-center py-4">لا توجد طلبات حضور معلقة.</p>`;
             } else {
@@ -485,6 +489,7 @@
             }
 
             const payBox = document.getElementById('admin-pending-pay-list');
+            if (!payBox) return;
             if (pendingPayments.length === 0) {
                 payBox.innerHTML = `<p class="text-gray-400 text-center py-4">لا توجد طلبات سداد معلقة.</p>`;
             } else {
@@ -564,7 +569,7 @@
             }
 
             let html = '';
-            filtered.forEach((st, idx) => {
+            filtered.forEach((st) => {
                 html += `
                     <tr class="hover:bg-gray-50 dark:hover:bg-slate-900/50">
                         <td class="p-2.5 font-mono font-bold text-blue-600 dark:text-blue-400">${st.code}</td>
