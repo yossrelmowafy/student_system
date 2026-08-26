@@ -1,0 +1,959 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>نظام السنتر الشامل - مستر يسر الموافي</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = { darkMode: 'class' }
+    </script>
+    <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .hero-bg {
+            background: linear-gradient(rgba(15, 23, 42, 0.90), rgba(15, 23, 42, 0.94)), url('https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?q=80&w=1600&auto=format&fit=crop');
+            background-size: cover;
+            background-position: center;
+        }
+    </style>
+</head>
+<body id="page-body" class="hero-bg text-white min-h-screen flex items-center justify-center p-4 transition-colors duration-300">
+
+    <div id="main-card" class="bg-white/95 text-gray-900 dark:bg-slate-900/95 dark:text-white p-6 md:p-8 rounded-3xl shadow-2xl w-full max-w-5xl text-center space-y-6 backdrop-blur-md border border-slate-700/50 transition-colors duration-300">
+        
+        <!-- رأس الصفحة -->
+        <div class="flex justify-between items-center border-b pb-4 border-slate-200 dark:border-slate-800">
+            <div class="text-right">
+                <h2 class="text-2xl font-black text-blue-600 dark:text-blue-400 tracking-wider">سنتر مستر يسر الموافي</h2>
+                <p class="text-xs text-gray-500 dark:text-gray-400 font-bold mt-1">نظام إدارة المحاسبة وإدارة الأعمال - للمرحلة الثانوية</p>
+            </div>
+            <button onclick="toggleDarkMode()" class="bg-gray-100 dark:bg-slate-800 p-2.5 rounded-2xl text-xl transition shadow hover:scale-105" title="تبديل الوضع الليلي">
+                <span id="theme-icon">🌙</span>
+            </button>
+        </div>
+
+        <!-- أزرار الاختيار بين الوضعين -->
+        <div id="mode-selector" class="flex gap-4 justify-center border-b pb-4 border-slate-200 dark:border-slate-800">
+            <button onclick="switchMode('student')" id="btn-mode-student" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-3.5 rounded-2xl font-bold transition shadow-lg text-sm flex items-center justify-center gap-2">
+                <i class="fa-solid fa-graduation-cap"></i> بوابة الطالب الذكية
+            </button>
+            <button onclick="switchMode('admin')" id="btn-mode-admin" class="flex-1 bg-gray-100 dark:bg-slate-800 text-gray-700 dark:text-gray-200 py-3.5 rounded-2xl font-bold transition shadow-lg text-sm flex items-center justify-center gap-2">
+                <i class="fa-solid fa-user-shield"></i> لوحة تحكم المشرف الشاملة
+            </button>
+        </div>
+
+        <!-- حاوية المحتوى الديناميكي -->
+        <div id="main-container"></div>
+
+    </div>
+
+    <script>
+        const ADMIN_WHATSAPP = "201015706200";
+
+        let students = JSON.parse(localStorage.getItem('yossr_students')) || [
+            { name: "أحمد محمد علي", code: "YOSS-101", phone: "01012345678", active: true }
+        ];
+
+        let pendingAttendance = JSON.parse(localStorage.getItem('yossr_pending_att')) || [];
+        let approvedAttendance = JSON.parse(localStorage.getItem('yossr_approved_att')) || [];
+        let pendingPayments = JSON.parse(localStorage.getItem('yossr_pending_pay')) || [];
+        let subscriptions = JSON.parse(localStorage.getItem('yossr_subscriptions')) || [];
+        let expenses = JSON.parse(localStorage.getItem('yossr_expenses')) || [];
+        
+        let schedules = JSON.parse(localStorage.getItem('yossr_schedules')) || [
+            { subject: "المحاسبة", days: "السبت والأربعاء", time: "2:00 ظهراً" },
+            { subject: "إدارة الأعمال", days: "الأحد والثلاثاء", time: "4:00 عصراً" }
+        ];
+
+        let isDarkMode = localStorage.getItem('yossr_dark_mode') === 'true';
+        if (isDarkMode) { applyDarkMode(true); }
+
+        function playSuccessSound() {
+            try {
+                const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(587.33, ctx.currentTime);
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                osc.start();
+                gain.gain.exponentialRampToValueAtTime(0.00001, ctx.currentTime + 0.3);
+                osc.stop(ctx.currentTime + 0.3);
+            } catch(e) {}
+        }
+
+        function toggleDarkMode() {
+            isDarkMode = !isDarkMode;
+            localStorage.setItem('yossr_dark_mode', isDarkMode);
+            applyDarkMode(isDarkMode);
+        }
+
+        function applyDarkMode(dark) {
+            const card = document.getElementById('main-card');
+            const icon = document.getElementById('theme-icon');
+            if (dark) {
+                card.classList.add('dark', 'bg-slate-950/95');
+                card.classList.remove('bg-white/95');
+                icon.textContent = "☀️";
+            } else {
+                card.classList.remove('dark', 'bg-slate-950/95');
+                card.classList.add('bg-white/95');
+                icon.textContent = "🌙";
+            }
+        }
+
+        function saveLocal() {
+            localStorage.setItem('yossr_students', JSON.stringify(students));
+            localStorage.setItem('yossr_pending_att', JSON.stringify(pendingAttendance));
+            localStorage.setItem('yossr_approved_att', JSON.stringify(approvedAttendance));
+            localStorage.setItem('yossr_pending_pay', JSON.stringify(pendingPayments));
+            localStorage.setItem('yossr_subscriptions', JSON.stringify(subscriptions));
+            localStorage.setItem('yossr_expenses', JSON.stringify(expenses));
+            localStorage.setItem('yossr_schedules', JSON.stringify(schedules));
+        }
+
+        function switchMode(mode) {
+            stopStudentQrScanner();
+            const studentBtn = document.getElementById('btn-mode-student');
+            const adminBtn = document.getElementById('btn-mode-admin');
+
+            if (mode === 'student') {
+                studentBtn.className = "flex-1 bg-blue-600 text-white py-3.5 rounded-2xl font-bold transition shadow-lg text-sm flex items-center justify-center gap-2";
+                adminBtn.className = "flex-1 bg-gray-100 dark:bg-slate-800 text-gray-700 dark:text-gray-200 py-3.5 rounded-2xl font-bold transition shadow-lg text-sm flex items-center justify-center gap-2";
+                renderStudentView();
+            } else if (mode === 'admin') {
+                const pass = prompt("الرجاء إدخال كلمة مرور المشرف:");
+                if (pass === "23122002YY") {
+                    adminBtn.className = "flex-1 bg-blue-600 text-white py-3.5 rounded-2xl font-bold transition shadow-lg text-sm flex items-center justify-center gap-2";
+                    studentBtn.className = "flex-1 bg-gray-100 dark:bg-slate-800 text-gray-700 dark:text-gray-200 py-3.5 rounded-2xl font-bold transition shadow-lg text-sm flex items-center justify-center gap-2";
+                    renderAdminView();
+                } else {
+                    alert("كلمة المرور غير صحيحة!");
+                }
+            }
+        }
+
+        // ================= 1. بوابة الطالب الذكية =================
+        function renderStudentView() {
+            const container = document.getElementById('main-container');
+            const todayName = new Date().toLocaleDateString('ar-EG', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+
+            let scheduleHtml = '';
+            schedules.forEach(sch => {
+                scheduleHtml += `<p>• ${sch.subject}: ${sch.days} (${sch.time})</p>`;
+            });
+
+            container.innerHTML = `
+                <div class="space-y-6 text-right max-w-xl mx-auto">
+                    <div class="bg-gradient-to-r from-blue-500/10 to-indigo-500/10 dark:from-slate-800 dark:to-slate-800 p-4 rounded-2xl border border-blue-200/50 dark:border-slate-700 flex justify-between items-center text-xs shadow-sm">
+                        <span class="font-bold text-blue-900 dark:text-blue-300"><i class="fa-solid fa-calendar-day ml-1"></i> ${todayName}</span>
+                        <span class="font-bold text-blue-700 dark:text-blue-400">مرحباً بك في بوابة التفوق والتميز</span>
+                    </div>
+
+                    <div class="bg-slate-50 dark:bg-slate-800/80 p-5 rounded-2xl border dark:border-slate-700 space-y-3 shadow-inner">
+                        <label class="block font-bold text-xs text-gray-700 dark:text-gray-300">أدخل كودك الشخصي أو امسح كارت الحضور:</label>
+                        <div class="flex gap-2">
+                            <input type="text" id="portal-code-input" placeholder="مثال: YOSS-101" class="flex-1 px-4 py-2.5 border rounded-xl text-xs uppercase font-mono font-bold bg-white dark:bg-slate-900 text-black dark:text-white border-slate-300 dark:border-slate-700">
+                            <button onclick="loadStudentPortalData()" class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-xl text-xs font-bold transition shadow">استعلام</button>
+                        </div>
+                        <div class="flex gap-2 pt-1">
+                            <button onclick="startStudentQrScanner()" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white py-2.5 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition">
+                                <i class="fa-solid fa-qrcode"></i> مسح كود الكارنيه (QR) بالكاميرا
+                            </button>
+                            <button onclick="stopStudentQrScanner()" class="bg-rose-500 hover:bg-rose-600 text-white px-4 py-2.5 rounded-xl text-xs font-bold transition">إغلاق</button>
+                        </div>
+                        <div id="student-qr-reader" class="w-full max-w-xs mx-auto bg-black rounded-xl overflow-hidden"></div>
+                    </div>
+
+                    <div id="student-portal-details" class="hidden space-y-4">
+                        <div class="grid grid-cols-2 gap-3">
+                            <div class="bg-white dark:bg-slate-800 p-4 rounded-2xl border dark:border-slate-700 shadow-sm">
+                                <span class="text-[11px] text-gray-500 block mb-1">الموقف المالي:</span>
+                                <div id="portal-fin-badge"></div>
+                            </div>
+                            <div class="bg-white dark:bg-slate-800 p-4 rounded-2xl border dark:border-slate-700 shadow-sm">
+                                <span class="text-[11px] text-gray-500 block mb-1">حصص الحضور المعتمدة:</span>
+                                <span id="portal-att-count" class="font-black text-base text-blue-600 dark:text-blue-400">0 حصة</span>
+                            </div>
+                        </div>
+
+                        <div class="bg-emerald-50/70 dark:bg-slate-800/70 p-4 rounded-2xl border border-emerald-200 dark:border-slate-700 space-y-3">
+                            <h3 class="font-bold text-xs text-emerald-900 dark:text-emerald-300">تسجيل حضور حصة اليوم:</h3>
+                            <button onclick="requestAttendanceApproval()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-3 rounded-xl font-bold text-xs shadow transition flex items-center justify-center gap-2">
+                                <i class="fa-solid fa-check-circle"></i> إرسال طلب تسجيل الحضور للمشرف
+                            </button>
+                            <div id="attendance-alert-box"></div>
+                        </div>
+
+                        <div class="bg-indigo-50/70 dark:bg-slate-800/70 p-4 rounded-2xl border border-indigo-200 dark:border-slate-700 space-y-3">
+                            <h3 class="font-bold text-xs text-indigo-900 dark:text-indigo-300">إرسال طلب سداد مصروفات أو مذكرة:</h3>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
+                                <select id="pay-subject" class="px-3 py-2.5 border rounded-xl text-xs bg-white dark:bg-slate-900 text-black dark:text-white border-slate-300 dark:border-slate-700">
+                                    <option value="المحاسبة">المحاسبة</option>
+                                    <option value="إدارة الأعمال">إدارة الأعمال</option>
+                                </select>
+                                <select id="pay-month" class="px-3 py-2.5 border rounded-xl text-xs bg-white dark:bg-slate-900 text-black dark:text-white border-slate-300 dark:border-slate-700">
+                                    <option value="سبتمبر">سبتمبر</option><option value="أكتوبر">أكتوبر</option><option value="نوفمبر">نوفمبر</option><option value="ديسمبر">ديسمبر</option><option value="يناير">يناير</option><option value="فبراير">فبراير</option><option value="مارس">مارس</option><option value="أبريل">أبريل</option><option value="مايو">مايو</option><option value="يونيو">يونيو</option><option value="يوليو">يوليو</option><option value="أغسطس">أغسطس</option>
+                                </select>
+                                <input type="number" id="pay-amount" placeholder="المبلغ (ج)" class="px-3 py-2.5 border rounded-xl text-xs bg-white dark:bg-slate-900 text-black dark:text-white border-slate-300 dark:border-slate-700">
+                            </div>
+                            <button onclick="requestPaymentApproval()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-3 rounded-xl font-bold text-xs shadow transition flex items-center justify-center gap-2">
+                                <i class="fa-solid fa-paper-plane"></i> إرسال طلب السداد للمشرف (قيد المراجعة)
+                            </button>
+                            <div id="payment-alert-box"></div>
+                        </div>
+
+                        <div class="bg-amber-50/70 dark:bg-slate-800/70 p-4 rounded-2xl border border-amber-200 dark:border-slate-700 space-y-2">
+                            <h4 class="font-bold text-xs text-amber-900 dark:text-amber-300"><i class="fa-solid fa-clock ml-1"></i> متابعة طلباتك المعلقة:</h4>
+                            <div id="student-pending-status-box" class="text-[11px] text-gray-700 dark:text-gray-300 space-y-1">
+                                جاري التحقق من الطلبات...
+                            </div>
+                        </div>
+
+                        <div class="bg-slate-50 dark:bg-slate-800/70 p-4 rounded-2xl border dark:border-slate-700 space-y-2">
+                            <h4 class="font-bold text-xs text-gray-800 dark:text-gray-200"><i class="fa-solid fa-calendar-days ml-1"></i> جدول مواعيد المجموعات الثابت:</h4>
+                            <div class="text-[11px] text-gray-600 dark:text-gray-300 space-y-1">
+                                ${scheduleHtml}
+                            </div>
+                        </div>
+
+                        <div class="flex gap-2">
+                            <button onclick="copyStudentCode()" class="flex-1 bg-slate-700 hover:bg-slate-800 text-white py-2.5 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition">
+                                <i class="fa-solid fa-copy"></i> نسخ الكود
+                            </button>
+                            <button onclick="openStudentCard()" class="flex-1 bg-sky-600 hover:bg-sky-700 text-white py-2.5 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition">
+                                <i class="fa-solid fa-id-card"></i> كارت الحضور
+                            </button>
+                        </div>
+                        <div>
+                            <a id="direct-wa-support" href="#" target="_blank" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-3 rounded-xl text-xs font-bold flex items-center justify-center gap-2 shadow transition">
+                                <i class="fa-brands fa-whatsapp text-sm"></i> تواصل مباشر مع الإدارة عبر الواتساب
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        let studentHtml5QrCode = null;
+        function startStudentQrScanner() {
+            if (!studentHtml5QrCode) { studentHtml5QrCode = new Html5Qrcode("student-qr-reader"); }
+            studentHtml5QrCode.start(
+                { facingMode: "environment" },
+                { fps: 10, qrbox: 200 },
+                (decodedText) => {
+                    const code = decodedText.trim().toUpperCase();
+                    const student = students.find(s => s.code.toUpperCase() === code);
+                    if (student) {
+                        playSuccessSound();
+                        document.getElementById('portal-code-input').value = student.code;
+                        stopStudentQrScanner();
+                        loadStudentPortalData();
+                        alert("✅ تم قراءة الكارنيه بنجاح: " + student.name);
+                    } else {
+                        alert("❌ الكود الممسوح غير مسجل لدى مستر يسر!");
+                    }
+                },
+                (err) => {}
+            ).catch(err => alert("تأكد من إذن استخدام الكاميرا."));
+        }
+
+        function stopStudentQrScanner() {
+            if (studentHtml5QrCode) { studentHtml5QrCode.stop().catch(err => {}); }
+        }
+
+        function loadStudentPortalData() {
+            const code = document.getElementById('portal-code-input').value.trim().toUpperCase();
+            if (!code) { alert("أدخل كود الطالب أو امسح الكارنيه أولاً!"); return; }
+            const student = students.find(s => s.code.toUpperCase() === code);
+            if (!student) { alert("الكود غير مسجل لدى مستر يسر!"); return; }
+
+            document.getElementById('student-portal-details').classList.remove('hidden');
+
+            let mySubs = subscriptions.filter(s => s.code === student.code);
+            let totalDebt = 0;
+            mySubs.forEach(s => totalDebt += s.remaining);
+
+            const badgeBox = document.getElementById('portal-fin-badge');
+            if (totalDebt > 0) {
+                badgeBox.innerHTML = `<span class="bg-rose-100 text-rose-800 dark:bg-rose-900/60 dark:text-rose-200 px-2.5 py-1 rounded-lg text-xs font-bold">عليه مديونية (${totalDebt}ج)</span>`;
+            } else {
+                badgeBox.innerHTML = `<span class="bg-emerald-100 text-emerald-800 dark:bg-emerald-900/60 dark:text-emerald-200 px-2.5 py-1 rounded-lg text-xs font-bold">حساب خالص ✅</span>`;
+            }
+
+            let myAtt = approvedAttendance.filter(a => a.code === student.code);
+            document.getElementById('portal-att-count').innerText = `${myAtt.length} حصة`;
+
+            updateStudentPendingView(student.code);
+
+            const supMsg = encodeURIComponent(`السلام عليكم مستر يسر، أنا الطالب/ة ${student.name} (كود: ${student.code}) وعندي استفسار بخصوص الحصص أو المصروفات.`);
+            document.getElementById('direct-wa-support').href = `https://wa.me/${ADMIN_WHATSAPP}?text=${supMsg}`;
+        }
+
+        function updateStudentPendingView(code) {
+            const box = document.getElementById('student-pending-status-box');
+            let pendingAttObj = pendingAttendance.find(a => a.code === code);
+            let pendingPayList = pendingPayments.filter(p => p.code === code);
+
+            let html = "";
+            if (pendingAttObj) {
+                html += `<p class="text-amber-600 dark:text-amber-400 font-bold">• طلب تسجيل الحضور: <b>قيد المراجعة ⏳</b></p>`;
+            } else {
+                html += `<p class="text-gray-500">• لا يوجد طلب حضور معلق اليوم.</p>`;
+            }
+
+            if (pendingPayList.length > 0) {
+                pendingPayList.forEach(p => {
+                    html += `<p class="text-indigo-600 dark:text-indigo-400 font-bold">• طلب دفع (${p.subject} - ${p.month} بمبلغ ${p.amount}ج): <b>قيد المراجعة ⏳</b></p>`;
+                });
+            } else {
+                html += `<p class="text-gray-500">• لا توجد طلبات دفع معلقة.</p>`;
+            }
+            box.innerHTML = html;
+        }
+
+        function requestAttendanceApproval() {
+            const code = document.getElementById('portal-code-input').value.trim().toUpperCase();
+            const alertBox = document.getElementById('attendance-alert-box');
+            const student = students.find(s => s.code.toUpperCase() === code);
+            
+            if (student.active === false) {
+                alertBox.innerHTML = `<div class="p-2.5 bg-rose-100 text-rose-700 rounded-xl text-xs font-bold">❌ عذراً، كودك موقوف مؤقتاً من الإدارة.</div>`;
+                return;
+            }
+
+            const todayStr = new Date().toLocaleDateString('ar-EG');
+            const alreadyAttended = approvedAttendance.some(a => a.code === student.code && a.date.includes(todayStr));
+            const alreadyPending = pendingAttendance.some(a => a.code === student.code);
+
+            if(alreadyAttended) {
+                alertBox.innerHTML = `<div class="p-2.5 bg-blue-100 text-blue-700 rounded-xl text-xs font-bold">ℹ️ تم قبول حضورك مسبقاً اليوم.</div>`;
+                return;
+            }
+            if(alreadyPending) {
+                alertBox.innerHTML = `<div class="p-2.5 bg-amber-100 text-amber-800 rounded-xl text-xs font-bold">⏳ طلب حضورك مسجل مسبقاً وهو قيد المراجعة لدى المشرف.</div>`;
+                return;
+            }
+
+            pendingAttendance.push({ name: student.name, code: student.code, date: new Date().toLocaleString('ar-EG') });
+            saveLocal();
+            alertBox.innerHTML = `<div class="p-2.5 bg-amber-100 text-amber-800 rounded-xl text-xs font-bold">⏳ تم إرسال طلب الحضور بنجاح وهو الآن (قيد المراجعة).</div>`;
+            updateStudentPendingView(student.code);
+        }
+
+        function requestPaymentApproval() {
+            const code = document.getElementById('portal-code-input').value.trim().toUpperCase();
+            const subject = document.getElementById('pay-subject').value;
+            const month = document.getElementById('pay-month').value;
+            const amount = parseFloat(document.getElementById('pay-amount').value) || 0;
+            const alertBox = document.getElementById('payment-alert-box');
+
+            if (amount <= 0) { alert("أدخل مبلغ صحيح!"); return; }
+            const student = students.find(s => s.code.toUpperCase() === code);
+
+            pendingPayments.push({ name: student.name, code: student.code, subject, month, amount, date: new Date().toLocaleString('ar-EG') });
+            saveLocal();
+
+            alertBox.innerHTML = `<div class="p-2.5 bg-indigo-100 text-indigo-800 rounded-xl text-xs font-bold">⏳ تم إرسال طلب السداد للمشرف وهو (قيد المراجعة).</div>`;
+            updateStudentPendingView(student.code);
+        }
+
+        function copyStudentCode() {
+            const code = document.getElementById('portal-code-input').value.trim();
+            navigator.clipboard.writeText(code).then(() => alert("تم نسخ الكود بنجاح: " + code));
+        }
+
+        function openStudentCard() {
+            const code = document.getElementById('portal-code-input').value.trim().toUpperCase();
+            const student = students.find(s => s.code.toUpperCase() === code);
+            printStudentCard(student.name, student.code);
+        }
+
+
+        // ================= 2. لوحة تحكم المشرف الشاملة =================
+        function renderAdminView() {
+            const container = document.getElementById('main-container');
+
+            let studentsOpts = '';
+            students.forEach(s => { studentsOpts += `<option value="${s.code}">${s.name} (${s.code})</option>`; });
+
+            let totalRevenue = 0;
+            let totalRemainingDebt = 0;
+            subscriptions.forEach(s => {
+                totalRevenue += s.paid;
+                totalRemainingDebt += s.remaining;
+            });
+
+            let totalExpenses = 0;
+            let expensesListHtml = '';
+            expenses.forEach((ex, idx) => {
+                totalExpenses += ex.amount;
+                expensesListHtml += `
+                    <div class="flex justify-between items-center bg-white dark:bg-slate-800 p-2.5 rounded-xl border dark:border-slate-700 text-xs text-black dark:text-white shadow-sm">
+                        <span><b>${ex.title}</b>: <span class="text-rose-600 font-bold">${ex.amount}ج</span> (${ex.date})</span>
+                        <div class="space-x-1 space-x-reverse">
+                            <button onclick="editExpense(${idx})" class="text-blue-500 font-bold px-1">تعديل</button>
+                            <button onclick="deleteExpense(${idx})" class="text-rose-500 font-bold px-1">حذف</button>
+                        </div>
+                    </div>
+                `;
+            });
+
+            let scheduleAdminHtml = '';
+            schedules.forEach((sch, idx) => {
+                scheduleAdminHtml += `
+                    <div class="flex justify-between items-center bg-white dark:bg-slate-800 p-3 rounded-xl border dark:border-slate-700 text-xs shadow-sm">
+                        <div><b>${sch.subject}</b>: ${sch.days} - ${sch.time}</div>
+                        <button onclick="editSchedule(${idx})" class="bg-blue-600 text-white px-3 py-1 rounded-lg font-bold">تعديل الموعد</button>
+                    </div>
+                `;
+            });
+
+            let netProfit = totalRevenue - totalExpenses;
+            const todayStr = new Date().toLocaleDateString('ar-EG');
+            
+            let presentTableRows = '';
+            let absentTableRows = '';
+            let presentCount = 0;
+
+            students.forEach(s => {
+                const attendedToday = approvedAttendance.find(a => a.code === s.code && a.date.includes(todayStr));
+                if (attendedToday) {
+                    presentCount++;
+                    presentTableRows += `
+                        <tr class="border-b dark:border-slate-800 text-xs text-black dark:text-white">
+                            <td class="p-2.5 font-bold">${s.name}</td>
+                            <td class="p-2.5 font-mono text-blue-600 dark:text-blue-400 font-bold">${s.code}</td>
+                            <td class="p-2.5">${attendedToday.date}</td>
+                            <td class="p-2.5"><span class="bg-emerald-100 text-emerald-800 dark:bg-emerald-900/60 dark:text-emerald-200 px-2 py-0.5 rounded-lg font-bold">${attendedToday.status}</span></td>
+                        </tr>
+                    `;
+                } else {
+                    absentTableRows += `
+                        <tr class="border-b dark:border-slate-800 text-xs text-black dark:text-white">
+                            <td class="p-2.5 font-bold">${s.name}</td>
+                            <td class="p-2.5 font-mono text-rose-600 dark:text-rose-400 font-bold">${s.code}</td>
+                            <td class="p-2.5">${s.phone || '--'}</td>
+                            <td class="p-2.5"><span class="bg-rose-100 text-rose-800 dark:bg-rose-900/60 dark:text-rose-200 px-2 py-0.5 rounded-lg font-bold">غائب اليوم</span></td>
+                        </tr>
+                    `;
+                }
+            });
+
+            let attendanceRatio = students.length > 0 ? Math.round((presentCount / students.length) * 100) : 0;
+
+            let pendingAttHtml = '';
+            pendingAttendance.forEach((att, idx) => {
+                pendingAttHtml += `
+                    <div class="flex justify-between items-center bg-white dark:bg-slate-800 p-2.5 rounded-xl border border-amber-200 dark:border-slate-700 text-xs text-black dark:text-white shadow-sm">
+                        <span><b>${att.name}</b> (كود: ${att.code}) يطلب تسجيل حضور (${att.date})</span>
+                        <div class="space-x-1 space-x-reverse">
+                            <button onclick="approveAttendanceReq(${idx})" class="bg-emerald-600 text-white px-2.5 py-1 rounded-lg font-bold">قبول وحضور</button>
+                            <button onclick="rejectAttendanceReq(${idx})" class="bg-rose-500 text-white px-2.5 py-1 rounded-lg font-bold">رفض</button>
+                        </div>
+                    </div>
+                `;
+            });
+
+            let pendingPayHtml = '';
+            pendingPayments.forEach((p, idx) => {
+                pendingPayHtml += `
+                    <div class="flex justify-between items-center bg-white dark:bg-slate-800 p-2.5 rounded-xl border dark:border-slate-700 text-xs text-black dark:text-white shadow-sm">
+                        <span><b>${p.name}</b> سدد <b>${p.amount}ج</b> (${p.subject} - ${p.month})</span>
+                        <div class="space-x-1 space-x-reverse">
+                            <button onclick="approvePay(${idx})" class="bg-emerald-600 text-white px-2.5 py-1 rounded-lg font-bold">قبول واعتماد</button>
+                            <button onclick="rejectPay(${idx})" class="bg-rose-500 text-white px-2.5 py-1 rounded-lg font-bold">رفض</button>
+                        </div>
+                    </div>
+                `;
+            });
+
+            let studentsTable = '';
+            students.forEach((s, idx) => {
+                let statusBtn = s.active !== false 
+                    ? `<button onclick="toggleStudentStatus(${idx})" class="bg-amber-500 text-white px-2 py-1 rounded-lg font-bold">تجميد</button>` 
+                    : `<button onclick="toggleStudentStatus(${idx})" class="bg-emerald-600 text-white px-2 py-1 rounded-lg font-bold">تفعيل</button>`;
+
+                studentsTable += `
+                    <tr class="border-b dark:border-slate-800 text-xs text-black dark:text-white student-row" data-name="${s.name.toLowerCase()}" data-code="${s.code.toLowerCase()}">
+                        <td class="p-2.5 font-bold">${s.name} ${s.active === false ? '<span class="text-rose-500">(موقوف)</span>' : ''}</td>
+                        <td class="p-2.5 font-mono text-blue-600 dark:text-blue-400 font-bold">${s.code}</td>
+                        <td class="p-2.5">${s.phone || '--'}</td>
+                        <td class="p-2.5 space-x-1 space-x-reverse">
+                            <button onclick="printStudentCard('${s.name}', '${s.code}')" class="bg-blue-600 text-white px-2 py-1 rounded-lg font-bold">🖨️ كارنيه</button>
+                            <button onclick="editStudent(${idx})" class="bg-indigo-600 text-white px-2 py-1 rounded-lg font-bold">تعديل</button>
+                            ${statusBtn}
+                            <button onclick="deleteStudent(${idx})" class="text-rose-500 font-bold px-1">حذف</button>
+                        </td>
+                    </tr>
+                `;
+            });
+
+            container.innerHTML = `
+                <div class="space-y-6 text-right">
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
+                        <div class="bg-emerald-50 dark:bg-slate-800/80 border border-emerald-200 dark:border-slate-700 p-4 rounded-2xl shadow-sm">
+                            <p class="text-xs text-emerald-700 dark:text-emerald-400 font-bold">الإيرادات المحصلة:</p>
+                            <h3 class="text-xl font-black text-emerald-900 dark:text-emerald-200 mt-1">${totalRevenue} جنيه</h3>
+                        </div>
+                        <div class="bg-rose-50 dark:bg-slate-800/80 border border-rose-200 dark:border-slate-700 p-4 rounded-2xl shadow-sm">
+                            <p class="text-xs text-rose-700 dark:text-rose-400 font-bold">إجمالي المصروفات:</p>
+                            <h3 class="text-xl font-black text-rose-900 dark:text-rose-200 mt-1">${totalExpenses} جنيه</h3>
+                        </div>
+                        <div class="bg-blue-50 dark:bg-slate-800/80 border border-blue-200 dark:border-slate-700 p-4 rounded-2xl shadow-sm">
+                            <p class="text-xs text-blue-700 dark:text-blue-400 font-bold">صافي الربح:</p>
+                            <h3 class="text-xl font-black text-blue-900 dark:text-blue-200 mt-1">${netProfit} جنيه</h3>
+                        </div>
+                        <div class="bg-indigo-50 dark:bg-slate-800/80 border border-indigo-200 dark:border-slate-700 p-4 rounded-2xl shadow-sm">
+                            <p class="text-xs text-indigo-700 dark:text-indigo-400 font-bold">نسبة الحضور اليومي:</p>
+                            <h3 class="text-xl font-black text-indigo-900 dark:text-indigo-200 mt-1">${attendanceRatio}%</h3>
+                        </div>
+                    </div>
+
+                    <div class="space-y-2 bg-amber-50/70 dark:bg-slate-800/80 p-4 rounded-2xl border border-amber-200 dark:border-slate-700">
+                        <h3 class="font-bold text-xs text-amber-900 dark:text-amber-300">⏳ طلبات تسجيل الحضور المعلقة (بانتظار موافقتك):</h3>
+                        <div class="space-y-1.5 max-h-36 overflow-y-auto">${pendingAttHtml || '<p class="text-gray-400 text-xs text-center py-2">لا توجد طلبات حضور معلقة.</p>'}</div>
+                    </div>
+
+                    <div class="space-y-2 bg-indigo-50/70 dark:bg-slate-800/80 p-4 rounded-2xl border border-indigo-200 dark:border-slate-700">
+                        <h3 class="font-bold text-xs text-indigo-900 dark:text-indigo-300">💳 طلبات السداد المعلقة بانتظار الاعتماد:</h3>
+                        <div class="space-y-1.5 max-h-36 overflow-y-auto">${pendingPayHtml || '<p class="text-gray-400 text-xs text-center py-2">لا توجد طلبات دفع معلقة.</p>'}</div>
+                    </div>
+
+                    <div class="space-y-2 bg-slate-100 dark:bg-slate-800/80 p-4 rounded-2xl border dark:border-slate-700">
+                        <h3 class="font-bold text-xs text-slate-800 dark:text-slate-200">📅 إدارة وتعديل مواعيد المجموعات الثابتة:</h3>
+                        <div class="space-y-2">${scheduleAdminHtml}</div>
+                    </div>
+
+                    <div class="bg-slate-100 dark:bg-slate-800/80 p-4 rounded-2xl border dark:border-slate-700 space-y-3">
+                        <h3 class="font-bold text-xs text-blue-800 dark:text-blue-300">🔍 ملف الطالب الشامل للمشرف (مع صلاحيات التعديل والحذف):</h3>
+                        <div class="flex gap-2">
+                            <select id="selected-student-dash" class="flex-1 px-3 py-2.5 border rounded-xl text-xs bg-white dark:bg-slate-900 text-black dark:text-white border-slate-300 dark:border-slate-700">
+                                <option value="">اختر طالب لعرض حسابه...</option>
+                                ${studentsOpts}
+                            </select>
+                            <button onclick="showStudentDashboard()" class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-xl text-xs font-bold transition">عرض الملف</button>
+                        </div>
+                        <div id="student-dashboard-result" class="pt-2"></div>
+                    </div>
+
+                    <div class="bg-emerald-50/50 dark:bg-slate-800/80 p-4 rounded-2xl border border-emerald-200 dark:border-slate-700 space-y-2">
+                        <div class="flex justify-between items-center">
+                            <h3 class="font-bold text-xs text-emerald-900 dark:text-emerald-300">✅ جدول حضور الطلاب اليوم (حاضر: ${presentCount}):</h3>
+                            <div class="space-x-1 space-x-reverse">
+                                <button onclick="printAttendanceTable('حضور')" class="bg-gray-700 hover:bg-gray-800 text-white px-3 py-1.5 rounded-xl text-xs font-bold transition">🖨️ طباعة الحضور</button>
+                                <button onclick="exportAttendanceReport()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded-xl text-xs font-bold transition">📊 تقرير الحضور (Excel)</button>
+                            </div>
+                        </div>
+                        <div id="printable-attendance-section" class="max-h-40 overflow-y-auto border rounded-xl bg-white dark:bg-slate-900 dark:border-slate-700">
+                            <table class="w-full text-right">
+                                <thead><tr class="bg-gray-100 dark:bg-slate-800 text-gray-700 dark:text-gray-200 text-xs"><th class="p-2.5">الاسم</th><th class="p-2.5">الكود</th><th class="p-2.5">وقت الحضور</th><th class="p-2.5">الموقف المالي</th></tr></thead>
+                                <tbody>${presentTableRows || '<tr><td colspan="4" class="text-center p-3 text-gray-400 text-xs">لا توجد حالات حضور مسجلة اليوم.</td></tr>'}</tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="bg-rose-50/50 dark:bg-slate-800/80 p-4 rounded-2xl border border-rose-200 dark:border-slate-700 space-y-2">
+                        <div class="flex justify-between items-center">
+                            <h3 class="font-bold text-xs text-rose-900 dark:text-rose-300">❌ جدول غياب الطلاب اليوم (غائب: ${students.length - presentCount}):</h3>
+                            <button onclick="printAttendanceTable('غياب')" class="bg-gray-700 hover:bg-gray-800 text-white px-3 py-1.5 rounded-xl text-xs font-bold transition">🖨️ طباعة الغياب</button>
+                        </div>
+                        <div id="printable-absence-section" class="max-h-40 overflow-y-auto border rounded-xl bg-white dark:bg-slate-900 dark:border-slate-700">
+                            <table class="w-full text-right">
+                                <thead><tr class="bg-gray-100 dark:bg-slate-800 text-gray-700 dark:text-gray-200 text-xs"><th class="p-2.5">الاسم</th><th class="p-2.5">الكود</th><th class="p-2.5">الهاتف</th><th class="p-2.5">الحالة</th></tr></thead>
+                                <tbody>${absentTableRows || '<tr><td colspan="4" class="text-center p-3 text-gray-400 text-xs">الكل حاضر اليوم ممتاز!</td></tr>'}</tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="bg-slate-800 text-white p-4 rounded-2xl space-y-3 shadow-md border border-slate-700">
+                        <h3 class="font-bold text-xs text-blue-400">ماسح الكود السريع (QR Scanner للمشرف):</h3>
+                        <div class="flex gap-2">
+                            <button onclick="startAdminQrScanner()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-xl text-xs font-bold transition">فتح الكاميرا</button>
+                            <button onclick="stopAdminQrScanner()" class="bg-rose-600 hover:bg-rose-700 text-white px-4 py-2 rounded-xl text-xs font-bold transition">إغلاق</button>
+                        </div>
+                        <div id="qr-reader" class="w-full max-w-sm mx-auto bg-black rounded-xl overflow-hidden"></div>
+                        <div id="qr-reader-results" class="text-xs text-emerald-400 font-mono"></div>
+                    </div>
+
+                    <div class="space-y-2 bg-orange-50/70 dark:bg-slate-800/80 p-4 rounded-2xl border border-orange-200 dark:border-slate-700">
+                        <h3 class="font-bold text-xs text-orange-900 dark:text-orange-300">تسجيل المصروفات والنفقات:</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
+                            <input type="text" id="exp-title" placeholder="بند المصروف (إيجار، طباعة...)" class="px-3 py-2.5 border rounded-xl text-xs bg-white dark:bg-slate-900 text-black dark:text-white border-slate-300 dark:border-slate-700">
+                            <input type="number" id="exp-amount" placeholder="المبلغ (ج)" class="px-3 py-2.5 border rounded-xl text-xs bg-white dark:bg-slate-900 text-black dark:text-white border-slate-300 dark:border-slate-700">
+                            <button onclick="addExpense()" class="bg-orange-600 hover:bg-orange-700 text-white py-2.5 rounded-xl text-xs font-bold transition">إضافة مصروف</button>
+                        </div>
+                        <div class="space-y-1.5 max-h-28 overflow-y-auto pt-2">${expensesListHtml || '<p class="text-gray-400 text-xs text-center">لا توجد مصروفات مسجلة.</p>'}</div>
+                    </div>
+
+                    <div class="space-y-2 bg-blue-50/70 dark:bg-slate-800/80 p-4 rounded-2xl border border-blue-200 dark:border-slate-700">
+                        <h3 class="font-bold text-xs text-blue-900 dark:text-blue-300">إضافة طالب جديد:</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-4 gap-2">
+                            <input type="text" id="new-name" placeholder="الاسم الكامل" class="px-3 py-2.5 border rounded-xl text-xs bg-white dark:bg-slate-900 text-black dark:text-white border-slate-300 dark:border-slate-700">
+                            <input type="text" id="new-code" placeholder="الكود (مثال: YOSS-102)" class="px-3 py-2.5 border rounded-xl text-xs bg-white dark:bg-slate-900 text-black dark:text-white border-slate-300 dark:border-slate-700 font-mono">
+                            <input type="text" id="new-phone" placeholder="الهاتف" class="px-3 py-2.5 border rounded-xl text-xs bg-white dark:bg-slate-900 text-black dark:text-white border-slate-300 dark:border-slate-700">
+                            <button onclick="addNewStudent()" class="bg-emerald-600 hover:bg-emerald-700 text-white py-2.5 rounded-xl text-xs font-bold transition">حفظ الطالب</button>
+                        </div>
+                    </div>
+
+                    <div class="space-y-2">
+                        <div class="flex justify-between items-center">
+                            <h3 class="font-bold text-xs text-gray-800 dark:text-gray-200">الطلاب المسجلين (${students.length}):</h3>
+                            <input type="text" id="search-student" onkeyup="filterStudents()" placeholder="بحث بالاسم أو الكود..." class="px-3 py-2 border rounded-xl text-xs bg-white dark:bg-slate-900 text-black dark:text-white w-48 font-mono border-slate-300 dark:border-slate-700">
+                        </div>
+                        <div class="max-h-40 overflow-y-auto border rounded-xl bg-white dark:bg-slate-900 dark:border-slate-700">
+                            <table class="w-full text-right" id="students-table-el">
+                                <thead><tr class="bg-gray-100 dark:bg-slate-800 text-gray-700 dark:text-gray-200 text-xs"><th class="p-2.5">الاسم</th><th class="p-2.5">الكود</th><th class="p-2.5">الهاتف</th><th class="p-2.5">الإجراءات وصلاحيات التعديل</th></tr></thead>
+                                <tbody>${studentsTable || '<tr><td colspan="4" class="text-center p-3 text-gray-400 text-xs">لا توجد طلاب.</td></tr>'}</tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="space-y-2 bg-slate-50 dark:bg-slate-800/80 p-4 rounded-2xl border dark:border-slate-700">
+                        <h3 class="font-bold text-xs text-gray-800 dark:text-gray-200">إنشاء مطالبة مالية للطالب:</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-6 gap-2">
+                            <select id="sub-code" class="px-3 py-2.5 border rounded-xl text-xs bg-white dark:bg-slate-900 text-black dark:text-white border-slate-300 dark:border-slate-700"><option value="">اختر الطالب</option>${studentsOpts}</select>
+                            <select id="sub-subject" class="px-3 py-2.5 border rounded-xl text-xs bg-white dark:bg-slate-900 text-black dark:text-white border-slate-300 dark:border-slate-700"><option value="المحاسبة">المحاسبة</option><option value="إدارة الأعمال">إدارة الأعمال</option></select>
+                            <select id="sub-type" class="px-3 py-2.5 border rounded-xl text-xs bg-white dark:bg-slate-900 text-black dark:text-white border-slate-300 dark:border-slate-700"><option value="اشتراك شهري">اشتراك شهري</option><option value="ثمن مذكرة">ثمن مذكرة</option><option value="رسوم امتحان">رسوم امتحان</option></select>
+                            <select id="sub-month" class="px-3 py-2.5 border rounded-xl text-xs bg-white dark:bg-slate-900 text-black dark:text-white border-slate-300 dark:border-slate-700"><option value="سبتمبر">سبتمبر</option><option value="أكتوبر">أكتوبر</option><option value="نوفمبر">نوفمبر</option><option value="ديسمبر">ديسمبر</option><option value="يناير">يناير</option><option value="فبراير">فبراير</option><option value="مارس">مارس</option><option value="أبريل">أبريل</option><option value="مايو">مايو</option><option value="يونيو">يونيو</option><option value="يوليو">يوليو</option><option value="أغسطس">أغسطس</option></select>
+                            <input type="number" id="sub-total" placeholder="المبلغ" class="px-3 py-2.5 border rounded-xl text-xs bg-white dark:bg-slate-900 text-black dark:text-white border-slate-300 dark:border-slate-700">
+                            <button onclick="createSubscription()" class="bg-blue-600 hover:bg-blue-700 text-white py-2.5 rounded-xl text-xs font-bold transition">إرسال</button>
+                        </div>
+                    </div>
+
+                    <div class="flex flex-wrap gap-2 pt-2">
+                        <button onclick="exportToExcel()" class="flex-1 bg-emerald-700 hover:bg-emerald-800 text-white py-3 rounded-xl text-xs font-bold transition shadow">📊 تصدير الحسابات (Excel)</button>
+                        <button onclick="resetAttendanceOnly()" class="bg-amber-600 hover:bg-amber-700 text-white px-4 py-3 rounded-xl text-xs font-bold transition shadow">🔄 تصفير الحضور فقط</button>
+                        <button onclick="resetAllDataExceptStudents()" class="bg-rose-700 hover:bg-rose-800 text-white px-4 py-3 rounded-xl text-xs font-bold transition shadow">⚠️ تصفير شامل</button>
+                        <button onclick="window.print()" class="bg-gray-700 hover:bg-gray-800 text-white px-5 py-3 rounded-xl text-xs font-bold transition shadow">🖨️ طباعة الصفحة</button>
+                    </div>
+
+                </div>
+            `;
+        }
+
+        function editStudent(idx) {
+            const s = students[idx];
+            const newName = prompt("تعديل اسم الطالب:", s.name);
+            if (newName === null) return;
+            const newPhone = prompt("تعديل رقم الهاتف:", s.phone || "");
+            if (newPhone === null) return;
+
+            s.name = newName.trim();
+            s.phone = newPhone.trim();
+            saveLocal();
+            renderAdminView();
+            alert("✅ تم تعديل بيانات الطالب بنجاح.");
+        }
+
+        function editSchedule(idx) {
+            const sch = schedules[idx];
+            const newDays = prompt(`تعديل أيام مجموعة (${sch.subject}):`, sch.days);
+            if (newDays === null) return;
+            const newTime = prompt(`تعديل وقت مجموعة (${sch.subject}):`, sch.time);
+            if (newTime === null) return;
+
+            sch.days = newDays.trim();
+            sch.time = newTime.trim();
+            saveLocal();
+            renderAdminView();
+            alert("✅ تم تحديث الموعد بنجاح.");
+        }
+
+        function editExpense(idx) {
+            const ex = expenses[idx];
+            const newTitle = prompt("تعديل بند المصروف:", ex.title);
+            if (newTitle === null) return;
+            const newAmount = parseFloat(prompt("تعديل المبلغ:", ex.amount));
+            if (isNaN(newAmount)) return;
+
+            ex.title = newTitle.trim();
+            ex.amount = newAmount;
+            saveLocal();
+            renderAdminView();
+            alert("✅ تم تعديل المصروف بنجاح.");
+        }
+
+        function approveAttendanceReq(idx) {
+            const att = pendingAttendance.splice(idx, 1)[0];
+            const student = students.find(s => s.code === att.code);
+            let studentSubs = subscriptions.filter(s => s.code === student.code);
+            let totalDebt = 0;
+            studentSubs.forEach(s => totalDebt += s.remaining);
+
+            approvedAttendance.unshift({ name: student.name, code: student.code, date: new Date().toLocaleString('ar-EG'), status: totalDebt > 0 ? `عليه مديونية (${totalDebt}ج)` : 'حساب خالص' });
+            saveLocal();
+            renderAdminView();
+            alert("✅ تم قبول تسجيل الحضور بنجاح.");
+        }
+
+        function rejectAttendanceReq(idx) {
+            pendingAttendance.splice(idx, 1);
+            saveLocal();
+            renderAdminView();
+        }
+
+        function printAttendanceTable(type) {
+            const content = type === 'حضور' ? document.getElementById('printable-attendance-section').innerHTML : document.getElementById('printable-absence-section').innerHTML;
+            const win = window.open('', '', 'width=600,height=600');
+            win.document.write(`
+                <html lang="ar" dir="rtl">
+                <head><title>تقرير ${type} - مستر يسر الموافي</title><script src="https://cdn.tailwindcss.com"><\/script></head>
+                <body class="p-8 font-sans bg-white text-black">
+                    <h2 class="text-xl font-bold text-center mb-4">تقرير ${type} الطلاب - سنتر مستر يسر الموافي</h2>
+                    <p class="text-sm text-center text-gray-500 mb-6">تاريخ اليوم: ${new Date().toLocaleDateString('ar-EG')}</p>
+                    <div class="border rounded-xl p-4">${content}</div>
+                    <script>setTimeout(() => window.print(), 300);<\/script>
+                </body>
+                </html>
+            `);
+            win.document.close();
+        }
+
+        function showStudentDashboard() {
+            const code = document.getElementById('selected-student-dash').value;
+            const resBox = document.getElementById('student-dashboard-result');
+            if(!code) { alert("اختر طالباً أولاً!"); return; }
+
+            const student = students.find(s => s.code === code);
+            const mySubs = subscriptions.filter(s => s.code === code);
+            let totalDebt = 0;
+            mySubs.forEach(s => totalDebt += s.remaining);
+            let myAtt = approvedAttendance.filter(a => a.code === code);
+
+            let subsHtml = mySubs.length > 0 ? mySubs.map((s, sIdx) => `<div class="bg-white dark:bg-slate-900 p-2.5 rounded-xl border dark:border-slate-700 text-xs flex justify-between items-center"><span><b>${s.subject}</b> (${s.month}) - مدفوع: ${s.paid}ج | متبقي: ${s.remaining}ج</span><button onclick="deleteSubscription('${s.code}', '${s.subject}', '${s.month}')" class="text-rose-500 font-bold px-2">حذف المطالبة</button></div>`).join('') : '<p class="text-xs text-gray-400">لا توجد مطالبات مالية.</p>';
+
+            resBox.innerHTML = `
+                <div class="bg-white dark:bg-slate-900 p-4 rounded-2xl border dark:border-slate-700 text-xs space-y-2 text-black dark:text-white shadow-sm">
+                    <p class="font-black text-blue-600 text-sm">اسم الطالب: ${student.name} (${student.code})</p>
+                    <p>الهاتف: ${student.phone || 'غير مسجل'} | الحالة: <span class="${student.active !== false ? 'text-emerald-600 font-bold' : 'text-rose-600 font-bold'}">${student.active !== false ? 'مفعل' : 'موقوف'}</span></p>
+                    <p>إجمالي المديونية: <span class="font-black ${totalDebt > 0 ? 'text-rose-600' : 'text-emerald-600'}">${totalDebt} جنيه</span></p>
+                    <div class="space-y-1.5 pt-1"><p class="font-bold text-gray-700 dark:text-gray-300">سجل الاشتراكات والمطالبات:</p>${subsHtml}</div>
+                    <p class="text-[11px] text-gray-500">عدد مرات الحضور المعتمدة: ${myAtt.length} مرة</p>
+                </div>
+            `;
+        }
+
+        function deleteSubscription(code, subject, month) {
+            if (confirm("هل أنت متأكد من حذف هذه المطالبة المالية؟")) {
+                subscriptions = subscriptions.filter(s => !(s.code === code && s.subject === subject && s.month === month));
+                saveLocal();
+                showStudentDashboard();
+            }
+        }
+
+        function toggleStudentStatus(idx) {
+            students[idx].active = students[idx].active === false ? true : false;
+            saveLocal();
+            renderAdminView();
+        }
+
+        function resetAttendanceOnly() {
+            if (confirm("⚠️ هل أنت متأكد من تصفير سجلات الحضور والغياب فقط؟")) {
+                approvedAttendance = [];
+                pendingAttendance = [];
+                saveLocal();
+                renderAdminView();
+                alert("✅ تم تصفير سجلات الحضور والغياب بنجاح.");
+            }
+        }
+
+        function resetAllDataExceptStudents() {
+            if (confirm("⚠️ تحذير: سيتم تصفير جميع الحسابات والمصروفات والحضور مع الاحتفاظ بالطلاب فقط. هل أنت متأكد؟")) {
+                pendingAttendance = [];
+                approvedAttendance = [];
+                pendingPayments = [];
+                subscriptions = [];
+                expenses = [];
+                saveLocal();
+                renderAdminView();
+                alert("✅ تم تصفير البيانات بنجاح.");
+            }
+        }
+
+        function addExpense() {
+            const title = document.getElementById('exp-title').value.trim();
+            const amount = parseFloat(document.getElementById('exp-amount').value) || 0;
+            if (!title || amount <= 0) { alert("أدخل بيانات صحيحة!"); return; }
+            expenses.push({ title, amount, date: new Date().toLocaleDateString('ar-EG') });
+            saveLocal();
+            renderAdminView();
+        }
+
+        function deleteExpense(idx) {
+            if (confirm("هل تريد حذف هذا المصروف؟")) {
+                expenses.splice(idx, 1);
+                saveLocal();
+                renderAdminView();
+            }
+        }
+
+        let adminHtml5QrCode = null;
+        function startAdminQrScanner() {
+            if (!adminHtml5QrCode) { adminHtml5QrCode = new Html5Qrcode("qr-reader"); }
+            adminHtml5QrCode.start(
+                { facingMode: "environment" },
+                { fps: 10, qrbox: 250 },
+                (decodedText) => {
+                    const code = decodedText.trim().toUpperCase();
+                    const student = students.find(s => s.code.toUpperCase() === code);
+                    const resBox = document.getElementById("qr-reader-results");
+                    if (student) {
+                        if (student.active === false) {
+                            resBox.innerHTML = `❌ الكود موقوف: ${student.name}`;
+                            return;
+                        }
+                        playSuccessSound();
+                        let studentSubs = subscriptions.filter(s => s.code === student.code);
+                        let totalDebt = 0;
+                        studentSubs.forEach(s => { totalDebt += s.remaining; });
+
+                        approvedAttendance.unshift({ name: student.name, code: student.code, date: new Date().toLocaleString('ar-EG'), status: totalDebt > 0 ? `عليه مديونية (${totalDebt}ج)` : 'حساب خالص' });
+                        saveLocal();
+                        resBox.innerHTML = `✅ تم حضور: ${student.name}`;
+                        renderAdminView();
+                    } else {
+                        resBox.innerHTML = `❌ كود غير معروف!`;
+                    }
+                },
+                (err) => {}
+            ).catch(err => alert("تأكد من إذن الكاميرا."));
+        }
+
+        function stopAdminQrScanner() {
+            if (adminHtml5QrCode) { adminHtml5QrCode.stop().catch(err => {}); }
+        }
+
+        function printStudentCard(name, code) {
+            const cardWindow = window.open('', '_blank', 'width=400,height=500');
+            cardWindow.document.write(`
+                <html lang="ar" dir="rtl">
+                <head><title>كارنيه الطالب - ${name}</title><script src="https://cdn.tailwindcss.com"><\/script></head>
+                <body class="flex items-center justify-center h-screen bg-gray-100">
+                    <div class="bg-white border-2 border-blue-600 p-6 rounded-3xl shadow-xl text-center w-80 space-y-4">
+                        <h2 class="text-lg font-black text-blue-700">مستر يسر الموافي</h2>
+                        <p class="text-xs text-gray-500 font-bold">محاسبة وإدارة أعمال</p>
+                        <div class="border-t border-b py-4 space-y-2">
+                            <h3 class="font-extrabold text-base text-gray-900">${name}</h3>
+                            <p class="font-mono text-lg font-black text-blue-600">${code}</p>
+                        </div>
+                        <div id="qrcode" class="flex justify-center my-2"></div>
+                    </div>
+                    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"><\/script>
+                    <script>
+                        new QRCode(document.getElementById("qrcode"), { text: "${code}", width: 128, height: 128 });
+                        setTimeout(() => { window.print(); }, 500);
+                    <\/script>
+                </body>
+                </html>
+            `);
+            cardWindow.document.close();
+        }
+
+        function filterStudents() {
+            const query = document.getElementById('search-student').value.toLowerCase();
+            document.querySelectorAll('.student-row').forEach(row => {
+                const name = row.getAttribute('data-name');
+                const code = row.getAttribute('data-code');
+                row.style.display = (name.includes(query) || code.includes(query)) ? "" : "none";
+            });
+        }
+
+        function exportToExcel() {
+            let csvContent = "\uFEFFاسم الطالب,الكود,المادة,البند,الشهر,الإجمالي,المدفوع,المتبقي\n";
+            subscriptions.forEach(s => {
+                csvContent += `"${s.name}","${s.code}","${s.subject || 'المحاسبة'}","${s.type || 'اشتراك'}","${s.month}",${s.total},${s.paid},${s.remaining}\n`;
+            });
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'Yossr_Accounts_Report.csv';
+            a.click();
+        }
+
+        function exportAttendanceReport() {
+            let csvContent = "\uFEFFاسم الطالب,الكود,تاريخ الحضور,الحالة المالية\n";
+            approvedAttendance.forEach(a => {
+                csvContent += `"${a.name}","${a.code}","${a.date}","${a.status}"\n`;
+            });
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const aEl = document.createElement('a');
+            aEl.href = url;
+            aEl.download = 'Yossr_Attendance_Report.csv';
+            aEl.click();
+        }
+
+        function approvePay(idx) {
+            const pay = pendingPayments.splice(idx, 1)[0];
+            let existingSub = subscriptions.find(s => s.code === pay.code && s.subject === pay.subject && s.month === pay.month);
+            if (existingSub) {
+                existingSub.paid += pay.amount;
+                existingSub.remaining = Math.max(0, existingSub.total - existingSub.paid);
+            } else {
+                subscriptions.push({ code: pay.code, name: pay.name, subject: pay.subject, type: "اشتراك شهري", month: pay.month, total: pay.amount, paid: pay.amount, remaining: 0 });
+            }
+            saveLocal();
+            renderAdminView();
+
+            const student = students.find(s => s.code === pay.code);
+            if (student && student.phone) {
+                const cleanPhone = student.phone.startsWith('0') ? '2' + student.phone : student.phone;
+                const receiptMsg = encodeURIComponent(`✅ *إيصال اعتماد سداد - مستر يسر الموافي*
+👤 الطالب: ${pay.name}
+📚 المادة: ${pay.subject} (${pay.month})
+💵 المبلغ المعتمد: ${pay.amount} جنيه
+✨ تم خصم المبلغ وتسجيله في حسابك بنجاح. شكراً التزامك!`);
+                window.open(`https://wa.me/${cleanPhone}?text=${receiptMsg}`, '_blank');
+            } else {
+                alert("تم الاعتماد بنجاح، ولكن رقم هاتف الطالب غير مسجل لإرسال الإيصال تلقائياً.");
+            }
+        }
+
+        function rejectPay(idx) {
+            pendingPayments.splice(idx, 1);
+            saveLocal();
+            renderAdminView();
+        }
+
+        function addNewStudent() {
+            const name = document.getElementById('new-name').value.trim();
+            const code = document.getElementById('new-code').value.trim().toUpperCase();
+            const phone = document.getElementById('new-phone').value.trim();
+            if (!name || !code) { alert("أدخل الاسم والكود!"); return; }
+            students.push({ name, code, phone, active: true });
+            saveLocal();
+            renderAdminView();
+        }
+
+        function deleteStudent(idx) {
+            if (confirm("هل أنت متأكد من حذف الطالب نهائياً؟")) {
+                students.splice(idx, 1);
+                saveLocal();
+                renderAdminView();
+            }
+        }
+
+        function createSubscription() {
+            const code = document.getElementById('sub-code').value;
+            const subject = document.getElementById('sub-subject').value;
+            const type = document.getElementById('sub-type').value;
+            const month = document.getElementById('sub-month').value;
+            const total = parseFloat(document.getElementById('sub-total').value) || 0;
+            if (!code || total <= 0) { alert("اختر الطالب والمبلغ!"); return; }
+
+            const student = students.find(s => s.code === code);
+            subscriptions.push({ code, name: student.name, subject, type, month, total, paid: 0, remaining: total });
+            saveLocal();
+            renderAdminView();
+        }
+
+        window.onload = function() { renderStudentView(); };
+    </script>
+</body>
+</html>
