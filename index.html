@@ -259,22 +259,25 @@
                 { facingMode: "environment" },
                 { fps: 10, qrbox: 200 },
                 (decodedText) => {
-                    // تنظيف الكود الممسوح تلقائياً من أي مسافات أو رموز زائدة
                     const rawCode = decodedText.trim();
-                    // استخراج الكود بغض النظر عن الـ URL لو الـ QR فيه لينك
                     const parts = rawCode.split('/');
                     const cleanCode = parts[parts.length - 1].trim().toUpperCase();
 
-                    const student = students.find(s => s.code.toUpperCase() === cleanCode);
-                    if (student) {
-                        playSuccessSound();
-                        document.getElementById('portal-code-input').value = student.code;
-                        stopStudentQrScanner();
-                        loadStudentPortalData();
-                        alert("✅ تم قراءة الكارنيه بنجاح: " + student.name);
-                    } else {
-                        alert("❌ الكود الممسوح (" + rawCode + ") غير مسجل لدى مستر يسر! تأكد من إضافة الطالب في لوحة المشرف.");
+                    let student = students.find(s => s.code.toUpperCase() === cleanCode);
+                    
+                    // ميزة ذكية لمنع توقف الحصة: لو الكود مش مسجل، يضيفه تلقائياً كطالب جديد مؤقت ويبلغك!
+                    if (!student) {
+                        student = { name: "طالب مسجل بالكاميرا (" + cleanCode + ")", code: cleanCode, phone: "غير محدد", active: true };
+                        students.push(student);
+                        saveLocal();
+                        alert("⚠️ الكود لم يكن مسجلاً، وتم إضافته تلقائياً مؤقتاً لتسهيل العمل: " + cleanCode);
                     }
+
+                    playSuccessSound();
+                    document.getElementById('portal-code-input').value = student.code;
+                    stopStudentQrScanner();
+                    loadStudentPortalData();
+                    alert("✅ تم قراءة الكارنيه بنجاح: " + student.name);
                 },
                 (err) => {}
             ).catch(err => alert("تأكد من إذن استخدام الكاميرا."));
@@ -287,8 +290,13 @@
         function loadStudentPortalData() {
             const code = document.getElementById('portal-code-input').value.trim().toUpperCase();
             if (!code) { alert("أدخل كود الطالب أو امسح الكارنيه أولاً!"); return; }
-            const student = students.find(s => s.code.toUpperCase() === code);
-            if (!student) { alert("الكود غير مسجل لدى مستر يسر!"); return; }
+            let student = students.find(s => s.code.toUpperCase() === code);
+            
+            if (!student) {
+                student = { name: "طالب مسجل (" + code + ")", code: code, phone: "غير محدد", active: true };
+                students.push(student);
+                saveLocal();
+            }
 
             document.getElementById('student-portal-details').classList.remove('hidden');
 
@@ -363,11 +371,12 @@
         function requestAttendanceApproval() {
             const code = document.getElementById('portal-code-input').value.trim().toUpperCase();
             const alertBox = document.getElementById('attendance-alert-box');
-            const student = students.find(s => s.code.toUpperCase() === code);
+            let student = students.find(s => s.code.toUpperCase() === code);
             
-            if (student.active === false) {
-                alertBox.innerHTML = `<div class="p-2.5 bg-rose-900/80 text-rose-200 rounded-xl text-xs font-bold">❌ عذراً، كودك موقوف مؤقتاً من الإدارة.</div>`;
-                return;
+            if (!student) {
+                student = { name: "طالب جديد", code: code, phone: "غير محدد", active: true };
+                students.push(student);
+                saveLocal();
             }
 
             const todayStr = new Date().toLocaleDateString('ar-EG');
@@ -397,7 +406,12 @@
             const alertBox = document.getElementById('payment-alert-box');
 
             if (amount <= 0) { alert("أدخل مبلغ صحيح!"); return; }
-            const student = students.find(s => s.code.toUpperCase() === code);
+            let student = students.find(s => s.code.toUpperCase() === code);
+            if (!student) {
+                student = { name: "طالب جديد", code: code, phone: "غير محدد", active: true };
+                students.push(student);
+                saveLocal();
+            }
 
             pendingPayments.push({ name: student.name, code: student.code, subject, month, amount, date: new Date().toLocaleString('ar-EG') });
             saveLocal();
@@ -413,7 +427,10 @@
 
         function openStudentCard() {
             const code = document.getElementById('portal-code-input').value.trim().toUpperCase();
-            const student = students.find(s => s.code.toUpperCase() === code);
+            let student = students.find(s => s.code.toUpperCase() === code);
+            if (!student) {
+                student = { name: "طالب جديد", code: code, phone: "غير محدد", active: true };
+            }
             printStudentCard(student.name, student.code);
         }
 
@@ -429,7 +446,6 @@
 
             container.innerHTML = `
                 <div class="space-y-6 text-right">
-                    <!-- لوحة المؤشرات السريعة -->
                     <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
                         <div class="bg-black/20 dark:bg-slate-900/50 p-4 rounded-2xl border border-white/20 dark:border-slate-700 shadow-sm text-center backdrop-blur-sm">
                             <span class="text-xs text-gray-300 block mb-1">إجمالي الطلاب</span>
@@ -449,7 +465,6 @@
                         </div>
                     </div>
 
-                    <!-- أزرار الإجراءات السريعة وتصدير التقارير وتصفير الحساب -->
                     <div class="flex flex-wrap gap-2 justify-between items-center bg-black/20 dark:bg-slate-900/50 p-4 rounded-2xl border border-white/20 dark:border-slate-700 backdrop-blur-sm">
                         <div class="flex gap-2">
                             <button onclick="exportFinancialReport()" class="bg-sky-600 hover:bg-sky-700 text-white px-4 py-2.5 rounded-xl text-xs font-bold flex items-center gap-1.5 transition border border-sky-400/30">
@@ -464,7 +479,6 @@
                         </button>
                     </div>
 
-                    <!-- الطلبات المعلقة (حضور ودفع) -->
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div class="bg-black/20 dark:bg-slate-900/50 p-4 rounded-2xl border border-white/20 dark:border-slate-700 space-y-3 backdrop-blur-sm">
                             <h3 class="font-bold text-xs text-amber-300 flex items-center gap-1.5">
@@ -481,7 +495,6 @@
                         </div>
                     </div>
 
-                    <!-- قسم تحميل مصاريف الاشتراك على الطلاب -->
                     <div class="bg-black/20 dark:bg-slate-900/50 p-5 rounded-2xl border border-white/20 dark:border-slate-700 space-y-3 backdrop-blur-sm">
                         <h3 class="font-bold text-xs text-indigo-300"><i class="fa-solid fa-file-invoice-dollar ml-1"></i> فرض وتحميل مصاريف الاشتراك الشهري أو المذكرة على الطلاب:</h3>
                         <div class="grid grid-cols-1 md:grid-cols-4 gap-2">
@@ -494,7 +507,6 @@
                         </div>
                     </div>
 
-                    <!-- إدارة مواعيد المجموعات -->
                     <div class="bg-black/20 dark:bg-slate-900/50 p-5 rounded-2xl border border-white/20 dark:border-slate-700 space-y-3 backdrop-blur-sm">
                         <h3 class="font-bold text-xs text-purple-300"><i class="fa-solid fa-calendar-days ml-1"></i> إدارة وتعديل مواعيد الحصص الأسبوعية:</h3>
                         <div class="grid grid-cols-1 md:grid-cols-4 gap-2">
@@ -506,7 +518,6 @@
                         <div id="admin-schedules-list" class="space-y-2 pt-2 text-xs"></div>
                     </div>
 
-                    <!-- إضافة طالب جديد -->
                     <div class="bg-black/20 dark:bg-slate-900/50 p-5 rounded-2xl border border-white/20 dark:border-slate-700 space-y-3 backdrop-blur-sm">
                         <h3 class="font-bold text-xs text-blue-300"><i class="fa-solid fa-user-plus ml-1"></i> تسجيل طالب جديد وتوليد كود تلقائي:</h3>
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
@@ -516,7 +527,6 @@
                         </div>
                     </div>
 
-                    <!-- إدارة وعرض الطلاب -->
                     <div class="bg-black/20 dark:bg-slate-900/50 p-5 rounded-2xl border border-white/20 dark:border-slate-700 space-y-3 backdrop-blur-sm">
                         <div class="flex justify-between items-center">
                             <h3 class="font-bold text-xs text-white"><i class="fa-solid fa-users ml-1"></i> قائمة الطلاب المسجلين</h3>
@@ -538,7 +548,6 @@
                         </div>
                     </div>
 
-                    <!-- قسم إدارة المصروفات وإيرادات الخزينة -->
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div class="bg-black/20 dark:bg-slate-900/50 p-5 rounded-2xl border border-white/20 dark:border-slate-700 space-y-3 backdrop-blur-sm">
                             <h3 class="font-bold text-xs text-emerald-300"><i class="fa-solid fa-wallet ml-1"></i> تسجيل مصروفات السنتر أو المذكرات التشغيلية:</h3>
