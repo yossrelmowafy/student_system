@@ -50,7 +50,7 @@
 
     </div>
 
-    <!-- نافذة طباعة الكارنيهات المخفية -->
+    <!-- نافذة طباعة الكارنيهات والتقارير المخفية -->
     <div id="print-card-area" class="hidden"></div>
 
     <script>
@@ -286,15 +286,11 @@
             document.getElementById('student-portal-details').classList.remove('hidden');
 
             let mySubs = subscriptions.filter(s => s.code === student.code);
-            let totalDebt = 0;
-            mySubs.forEach(s => totalDebt += s.remaining);
+            let totalPaid = 0;
+            mySubs.forEach(s => totalPaid += s.amount);
 
             const badgeBox = document.getElementById('portal-fin-badge');
-            if (totalDebt > 0) {
-                badgeBox.innerHTML = `<span class="bg-rose-100 text-rose-800 dark:bg-rose-900/60 dark:text-rose-200 px-2.5 py-1 rounded-lg text-xs font-bold">عليه مديونية (${totalDebt}ج)</span>`;
-            } else {
-                badgeBox.innerHTML = `<span class="bg-emerald-100 text-emerald-800 dark:bg-emerald-900/60 dark:text-emerald-200 px-2.5 py-1 rounded-lg text-xs font-bold">حساب خالص ✅</span>`;
-            }
+            badgeBox.innerHTML = `<span class="bg-emerald-100 text-emerald-800 dark:bg-emerald-900/60 dark:text-emerald-200 px-2.5 py-1 rounded-lg text-xs font-bold">إجمالي المدفوع (${totalPaid}ج)</span>`;
 
             let myAtt = approvedAttendance.filter(a => a.code === student.code);
             document.getElementById('portal-att-count').innerText = `${myAtt.length} حصة`;
@@ -410,6 +406,21 @@
                         </div>
                     </div>
 
+                    <!-- أزرار الإجراءات السريعة وتصدير التقارير وتصفير الحساب -->
+                    <div class="flex flex-wrap gap-2 justify-between items-center bg-slate-50 dark:bg-slate-800/80 p-4 rounded-2xl border dark:border-slate-700">
+                        <div class="flex gap-2">
+                            <button onclick="exportFinancialReport()" class="bg-sky-600 hover:bg-sky-700 text-white px-4 py-2.5 rounded-xl text-xs font-bold flex items-center gap-1.5 transition">
+                                <i class="fa-solid fa-file-excel"></i> تصدير وطباعة التقرير المالي
+                            </button>
+                            <button onclick="exportStudentsReport()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-xl text-xs font-bold flex items-center gap-1.5 transition">
+                                <i class="fa-solid fa-users-rectangle"></i> تقرير الطلاب الكلي
+                            </button>
+                        </div>
+                        <button onclick="resetSystemData()" class="bg-rose-600 hover:bg-rose-700 text-white px-4 py-2.5 rounded-xl text-xs font-bold flex items-center gap-1.5 transition">
+                            <i class="fa-solid fa-triangle-exclamation"></i> تصفير جميع البيانات
+                        </button>
+                    </div>
+
                     <!-- الطلبات المعلقة (حضور ودفع) -->
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div class="bg-slate-50 dark:bg-slate-800/80 p-4 rounded-2xl border dark:border-slate-700 space-y-3">
@@ -425,6 +436,18 @@
                             </h3>
                             <div id="admin-pending-pay-list" class="space-y-2 max-h-48 overflow-y-auto text-xs"></div>
                         </div>
+                    </div>
+
+                    <!-- إدارة مواعيد المجموعات -->
+                    <div class="bg-slate-50 dark:bg-slate-800/80 p-5 rounded-2xl border dark:border-slate-700 space-y-3">
+                        <h3 class="font-bold text-xs text-purple-700 dark:text-purple-400"><i class="fa-solid fa-calendar-days ml-1"></i> إدارة وتعديل مواعيد الحصص الأسبوعية:</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-4 gap-2">
+                            <input type="text" id="sch-subject" placeholder="اسم المادة (محاسبة/إدارة)" class="px-3 py-2.5 border rounded-xl text-xs bg-white dark:bg-slate-900 text-black dark:text-white border-slate-300 dark:border-slate-700">
+                            <input type="text" id="sch-days" placeholder="الأيام (مثال: السبت والأربعاء)" class="px-3 py-2.5 border rounded-xl text-xs bg-white dark:bg-slate-900 text-black dark:text-white border-slate-300 dark:border-slate-700">
+                            <input type="text" id="sch-time" placeholder="الوقت (مثال: 2:00 ظهراً)" class="px-3 py-2.5 border rounded-xl text-xs bg-white dark:bg-slate-900 text-black dark:text-white border-slate-300 dark:border-slate-700">
+                            <button onclick="addSchedule()" class="bg-purple-600 hover:bg-purple-700 text-white py-2.5 rounded-xl font-bold text-xs shadow transition">إضافة موعد جديد</button>
+                        </div>
+                        <div id="admin-schedules-list" class="space-y-2 pt-2 text-xs"></div>
                     </div>
 
                     <!-- إضافة طالب جديد -->
@@ -472,9 +495,7 @@
 
                         <div class="bg-slate-50 dark:bg-slate-800/80 p-5 rounded-2xl border dark:border-slate-700 space-y-3">
                             <h3 class="font-bold text-xs text-blue-700 dark:text-blue-400"><i class="fa-solid fa-chart-line ml-1"></i> الخزينة والملخص المالي:</h3>
-                            <div id="financial-summary-box" class="text-xs space-y-2 text-gray-700 dark:text-gray-300">
-                                <!-- يتم تحديثه برمجياً -->
-                            </div>
+                            <div id="financial-summary-box" class="text-xs space-y-2 text-gray-700 dark:text-gray-300"></div>
                         </div>
                     </div>
                 </div>
@@ -482,6 +503,7 @@
             loadAdminPendingLists();
             renderAdminStudentsTable();
             renderFinancialSummary();
+            renderAdminSchedulesList();
         }
 
         function loadAdminPendingLists() {
@@ -559,6 +581,43 @@
             pendingPayments.splice(index, 1);
             saveLocal();
             loadAdminPendingLists();
+        }
+
+        function addSchedule() {
+            const subject = document.getElementById('sch-subject').value.trim();
+            const days = document.getElementById('sch-days').value.trim();
+            const time = document.getElementById('sch-time').value.trim();
+            if(!subject || !days || !time) { alert("أدخل كافة بيانات الموعد!"); return; }
+
+            schedules.push({ subject, days, time });
+            saveLocal();
+            document.getElementById('sch-subject').value = '';
+            document.getElementById('sch-days').value = '';
+            document.getElementById('sch-time').value = '';
+            renderAdminSchedulesList();
+            alert("✅ تم إضافة الموعد بنجاح");
+        }
+
+        function renderAdminSchedulesList() {
+            const box = document.getElementById('admin-schedules-list');
+            if(!box) return;
+            if(schedules.length === 0) { box.innerHTML = `<p class="text-gray-400">لا توجد مواعيد مضافة.</p>`; return; }
+            let html = "";
+            schedules.forEach((sch, idx) => {
+                html += `
+                    <div class="flex justify-between items-center bg-white dark:bg-slate-900 p-2.5 rounded-xl border dark:border-slate-700">
+                        <span><b>${sch.subject}:</b> ${sch.days} (${sch.time})</span>
+                        <button onclick="deleteSchedule(${idx})" class="bg-rose-500 text-white px-2.5 py-1 rounded-lg text-[10px] font-bold">حذف</button>
+                    </div>
+                `;
+            });
+            box.innerHTML = html;
+        }
+
+        function deleteSchedule(idx) {
+            schedules.splice(idx, 1);
+            saveLocal();
+            renderAdminSchedulesList();
         }
 
         function addExpense() {
@@ -643,14 +702,27 @@
                             </span>
                         </td>
                         <td class="p-2.5 text-center space-x-1 space-x-reverse">
-                            <button onclick="printStudentCard('${st.name}', '${st.code}')" class="bg-sky-600 hover:bg-sky-700 text-white px-2.5 py-1 rounded-lg text-[10px] font-bold" title="طباعة الكارنيه"><i class="fa-solid fa-id-card"></i></button>
-                            <button onclick="toggleStudentStatus('${st.code}')" class="bg-amber-600 hover:bg-amber-700 text-white px-2.5 py-1 rounded-lg text-[10px] font-bold" title="تبديل الحالة">تبديل</button>
-                            <button onclick="deleteStudent('${st.code}')" class="bg-rose-600 hover:bg-rose-700 text-white px-2.5 py-1 rounded-lg text-[10px] font-bold" title="حذف"><i class="fa-solid fa-trash"></i></button>
+                            <button onclick="printStudentCard('${st.name}', '${st.code}')" class="bg-sky-600 hover:bg-sky-700 text-white px-2 py-1 rounded-lg text-[10px] font-bold" title="طباعة الكارنيه"><i class="fa-solid fa-id-card"></i></button>
+                            <button onclick="editStudent('${st.code}')" class="bg-blue-600 hover:bg-blue-700 text-white px-2 py-1 rounded-lg text-[10px] font-bold" title="تعديل البيانات"><i class="fa-solid fa-pen"></i></button>
+                            <button onclick="toggleStudentStatus('${st.code}')" class="bg-amber-600 hover:bg-amber-700 text-white px-2 py-1 rounded-lg text-[10px] font-bold" title="تبديل الحالة">تبديل</button>
+                            <button onclick="deleteStudent('${st.code}')" class="bg-rose-600 hover:bg-rose-700 text-white px-2 py-1 rounded-lg text-[10px] font-bold" title="حذف"><i class="fa-solid fa-trash"></i></button>
                         </td>
                     </tr>
                 `;
             });
             tbody.innerHTML = html;
+        }
+
+        function editStudent(code) {
+            let st = students.find(s => s.code === code);
+            if(!st) return;
+            const newName = prompt("تعديل اسم الطالب:", st.name);
+            const newPhone = prompt("تعديل رقم الهاتف:", st.phone);
+            if(newName !== null) st.name = newName.trim() || st.name;
+            if(newPhone !== null) st.phone = newPhone.trim() || st.phone;
+            saveLocal();
+            renderAdminStudentsTable();
+            alert("✅ تم تعديل بيانات الطالب بنجاح");
         }
 
         function toggleStudentStatus(code) {
@@ -667,6 +739,94 @@
                 students = students.filter(s => s.code !== code);
                 saveLocal();
                 renderAdminStudentsTable();
+            }
+        }
+
+        function exportFinancialReport() {
+            let totalIncome = 0;
+            subscriptions.forEach(s => totalIncome += (s.amount || 0));
+            let totalExpenses = 0;
+            expenses.forEach(e => totalExpenses += (e.amount || 0));
+
+            const printArea = document.getElementById('print-card-area');
+            printArea.classList.remove('hidden');
+            printArea.innerHTML = `
+                <div style="direction: rtl; padding: 30px; font-family: Tahoma, sans-serif; color: #000;">
+                    <h2 style="text-align: center; color: #1e3a8a; margin-bottom: 5px;">مستر يسر الموافي - تقرير الحسابات المالية</h2>
+                    <p style="text-align: center; font-size: 12px; color: #555; margin-bottom: 25px;">نظام إدارة المحاسبة وإدارة الأعمال - البكالوريا</p>
+                    <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 14px;">
+                        <tr style="background: #f3f4f6;"><th style="border: 1px solid #ddd; padding: 10px;">البيان المالي</th><th style="border: 1px solid #ddd; padding: 10px;">القيمة</th></tr>
+                        <tr><td style="border: 1px solid #ddd; padding: 10px;">إجمالي إيرادات الاشتراكات</td><td style="border: 1px solid #ddd; padding: 10px; color: green; font-weight: bold;">${totalIncome} ج.م</td></tr>
+                        <tr><td style="border: 1px solid #ddd; padding: 10px;">إجمالي المصروفات والطباعة</td><td style="border: 1px solid #ddd; padding: 10px; color: red; font-weight: bold;">${totalExpenses} ج.م</td></tr>
+                        <tr style="background: #eff6ff;"><td style="border: 1px solid #ddd; padding: 10px; font-weight: bold;">صافي الخزينة</td><td style="border: 1px solid #ddd; padding: 10px; color: blue; font-weight: bold;">${totalIncome - totalExpenses} ج.م</td></tr>
+                    </table>
+                    <p style="text-align: left; font-size: 11px; margin-top: 40px;">تاريخ التقرير: ${new Date().toLocaleString('ar-EG')}</p>
+                </div>
+            `;
+            setTimeout(() => {
+                window.print();
+                printArea.classList.add('hidden');
+            }, 300);
+        }
+
+        function exportStudentsReport() {
+            const printArea = document.getElementById('print-card-area');
+            printArea.classList.remove('hidden');
+            
+            let rows = "";
+            students.forEach((st, idx) => {
+                rows += `<tr>
+                    <td style="border: 1px solid #ddd; padding: 8px;">${idx + 1}</td>
+                    <td style="border: 1px solid #ddd; padding: 8px; font-family: monospace;">${st.code}</td>
+                    <td style="border: 1px solid #ddd; padding: 8px; font-weight: bold;">${st.name}</td>
+                    <td style="border: 1px solid #ddd; padding: 8px;">${st.phone}</td>
+                    <td style="border: 1px solid #ddd; padding: 8px;">${st.active !== false ? 'نشط' : 'موقف'}</td>
+                </tr>`;
+            });
+
+            printArea.innerHTML = `
+                <div style="direction: rtl; padding: 30px; font-family: Tahoma, sans-serif; color: #000;">
+                    <h2 style="text-align: center; color: #1e3a8a; margin-bottom: 5px;">مستر يسر الموافي - كشف بأسماء الطلاب</h2>
+                    <p style="text-align: center; font-size: 12px; color: #555; margin-bottom: 25px;">إجمالي الطلاب المسجلين: ${students.length}</p>
+                    <table style="width: 100%; border-collapse: collapse; text-align: right; font-size: 13px;">
+                        <thead>
+                            <tr style="background: #f3f4f6;">
+                                <th style="border: 1px solid #ddd; padding: 8px;">#</th>
+                                <th style="border: 1px solid #ddd; padding: 8px;">الكود</th>
+                                <th style="border: 1px solid #ddd; padding: 8px;">اسم الطالب</th>
+                                <th style="border: 1px solid #ddd; padding: 8px;">الهاتف</th>
+                                <th style="border: 1px solid #ddd; padding: 8px;">الحالة</th>
+                            </tr>
+                        </thead>
+                        <tbody>${rows}</tbody>
+                    </table>
+                    <p style="text-align: left; font-size: 11px; margin-top: 40px;">تاريخ الطباعة: ${new Date().toLocaleString('ar-EG')}</p>
+                </div>
+            `;
+            setTimeout(() => {
+                window.print();
+                printArea.classList.add('hidden');
+            }, 300);
+        }
+
+        function resetSystemData() {
+            if (confirm("⚠️ تحذير خطير: هل أنت متأكد تماماً من تصفير وحذف جميع بيانات الطلاب والمصروفات والاشتراكات نهائياً؟")) {
+                const doubleCheck = prompt("لأمان النظام، اكتب كلمة (تصفير) للتأكيد:");
+                if (doubleCheck === "تصفير") {
+                    localStorage.clear();
+                    students = [];
+                    pendingAttendance = [];
+                    approvedAttendance = [];
+                    pendingPayments = [];
+                    subscriptions = [];
+                    expenses = [];
+                    schedules = [];
+                    saveLocal();
+                    renderAdminView();
+                    alert("✅ تم تصفير كافة بيانات النظام بنجاح.");
+                } else {
+                    alert("تم إلغاء عملية التصفير لعدم تطابق الكلمة.");
+                }
             }
         }
 
