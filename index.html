@@ -22,25 +22,26 @@
 </head>
 <body id="page-body" class="hero-bg text-white min-h-screen flex items-center justify-center p-4 transition-colors duration-300">
 
-    <div id="main-card" class="bg-white/95 text-gray-900 dark:bg-slate-900/95 dark:text-white p-6 md:p-8 rounded-3xl shadow-2xl w-full max-w-5xl text-center space-y-6 backdrop-blur-md border border-slate-700/50 transition-colors duration-300">
+    <!-- تم جعل الكارد شفاف تماماً مع زجاج خفيف ليظهر صورتك وخلفيتك بوضوح تام -->
+    <div id="main-card" class="bg-white/10 dark:bg-slate-950/20 text-gray-900 dark:text-white p-6 md:p-8 rounded-3xl shadow-2xl w-full max-w-5xl text-center space-y-6 backdrop-blur-md border border-white/20 dark:border-slate-700/30 transition-colors duration-300">
         
         <!-- رأس الصفحة -->
-        <div class="flex justify-between items-center border-b pb-4 border-slate-200 dark:border-slate-800">
+        <div class="flex justify-between items-center border-b pb-4 border-white/20 dark:border-slate-800/50">
             <div class="text-right">
-                <h2 class="text-2xl font-black text-blue-600 dark:text-blue-400 tracking-wider">مستر يسر الموافي</h2>
-                <p class="text-xs text-gray-500 dark:text-gray-400 font-bold mt-1">نظام المحاسبة وإدارة الأعمال - نظام البكالوريا (دفعة 2027)</p>
+                <h2 class="text-2xl font-black text-blue-400 dark:text-blue-400 tracking-wider drop-shadow-md">مستر يسر الموافي</h2>
+                <p class="text-xs text-gray-200 dark:text-gray-300 font-bold mt-1 drop-shadow">نظام المحاسبة وإدارة الأعمال - نظام البكالوريا (دفعة 2027)</p>
             </div>
-            <button onclick="toggleDarkMode()" class="bg-gray-100 dark:bg-slate-800 p-2.5 rounded-2xl text-xl transition shadow hover:scale-105" title="تبديل الوضع الليلي">
+            <button onclick="toggleDarkMode()" class="bg-black/30 dark:bg-slate-800/50 text-white p-2.5 rounded-2xl text-xl transition shadow hover:scale-105 border border-white/10" title="تبديل الوضع الليلي">
                 <span id="theme-icon">🌙</span>
             </button>
         </div>
 
         <!-- أزرار الاختيار بين الوضعين -->
-        <div id="mode-selector" class="flex gap-4 justify-center border-b pb-4 border-slate-200 dark:border-slate-800">
-            <button onclick="switchMode('student')" id="btn-mode-student" class="flex-1 bg-blue-600 text-white py-3.5 rounded-2xl font-bold transition shadow-lg text-sm flex items-center justify-center gap-2">
+        <div id="mode-selector" class="flex gap-4 justify-center border-b pb-4 border-white/20 dark:border-slate-800/50">
+            <button onclick="switchMode('student')" id="btn-mode-student" class="flex-1 bg-blue-600/90 hover:bg-blue-600 text-white py-3.5 rounded-2xl font-bold transition shadow-lg text-sm flex items-center justify-center gap-2 border border-blue-400/30">
                 <i class="fa-solid fa-graduation-cap"></i> بوابة الطالب الذكية
             </button>
-            <button onclick="requestAdminAccess()" id="btn-mode-admin" class="flex-1 bg-gray-100 dark:bg-slate-800 text-gray-700 dark:text-gray-200 py-3.5 rounded-2xl font-bold transition shadow-lg text-sm flex items-center justify-center gap-2">
+            <button onclick="requestAdminAccess()" id="btn-mode-admin" class="flex-1 bg-black/20 dark:bg-slate-800/40 text-gray-100 dark:text-gray-200 py-3.5 rounded-2xl font-bold transition shadow-lg text-sm flex items-center justify-center gap-2 border border-white/10">
                 <i class="fa-solid fa-user-shield"></i> لوحة تحكم المشرف الشاملة
             </button>
         </div>
@@ -104,12 +105,10 @@
             const card = document.getElementById('main-card');
             const icon = document.getElementById('theme-icon');
             if (dark) {
-                card.classList.add('dark', 'bg-slate-950/95');
-                card.classList.remove('bg-white/95');
+                card.classList.add('dark');
                 icon.textContent = "☀️";
             } else {
-                card.classList.remove('dark', 'bg-slate-950/95');
-                card.classList.add('bg-white/95');
+                card.classList.remove('dark');
                 icon.textContent = "🌙";
             }
         }
@@ -131,12 +130,12 @@
             const adminBtn = document.getElementById('btn-mode-admin');
 
             if (mode === 'student') {
-                studentBtn.className = "flex-1 bg-blue-600 text-white py-3.5 rounded-2xl font-bold transition shadow-lg text-sm flex items-center justify-center gap-2";
-                adminBtn.className = "flex-1 bg-gray-100 dark:bg-slate-800 text-gray-700 dark:text-gray-200 py-3.5 rounded-2xl font-bold transition shadow-lg text-sm flex items-center justify-center gap-2";
+                studentBtn.className = "flex-1 bg-blue-600/90 hover:bg-blue-600 text-white py-3.5 rounded-2xl font-bold transition shadow-lg text-sm flex items-center justify-center gap-2 border border-blue-400/30";
+                adminBtn.className = "flex-1 bg-black/20 dark:bg-slate-800/40 text-gray-100 dark:text-gray-200 py-3.5 rounded-2xl font-bold transition shadow-lg text-sm flex items-center justify-center gap-2 border border-white/10";
                 renderStudentView();
             } else if (mode === 'admin') {
-                adminBtn.className = "flex-1 bg-blue-600 text-white py-3.5 rounded-2xl font-bold transition shadow-lg text-sm flex items-center justify-center gap-2";
-                studentBtn.className = "flex-1 bg-gray-100 dark:bg-slate-800 text-gray-700 dark:text-gray-200 py-3.5 rounded-2xl font-bold transition shadow-lg text-sm flex items-center justify-center gap-2";
+                adminBtn.className = "flex-1 bg-blue-600/90 hover:bg-blue-600 text-white py-3.5 rounded-2xl font-bold transition shadow-lg text-sm flex items-center justify-center gap-2 border border-blue-400/30";
+                studentBtn.className = "flex-1 bg-black/20 dark:bg-slate-800/40 text-gray-100 dark:text-gray-200 py-3.5 rounded-2xl font-bold transition shadow-lg text-sm flex items-center justify-center gap-2 border border-white/10";
                 renderAdminView();
             }
         }
@@ -162,19 +161,19 @@
 
             container.innerHTML = `
                 <div class="space-y-6 text-right max-w-xl mx-auto">
-                    <div class="bg-gradient-to-r from-blue-500/10 to-indigo-500/10 dark:from-slate-800 dark:to-slate-800 p-4 rounded-2xl border border-blue-200/50 dark:border-slate-700 flex justify-between items-center text-xs shadow-sm">
-                        <span class="font-bold text-blue-900 dark:text-blue-300"><i class="fa-solid fa-calendar-day ml-1"></i> ${todayName}</span>
-                        <span class="font-bold text-blue-700 dark:text-blue-400">مرحباً بك في بوابة التفوق والتميز</span>
+                    <div class="bg-black/20 dark:bg-slate-900/40 p-4 rounded-2xl border border-white/20 dark:border-slate-700/50 flex justify-between items-center text-xs shadow-sm backdrop-blur-sm">
+                        <span class="font-bold text-white"><i class="fa-solid fa-calendar-day ml-1"></i> ${todayName}</span>
+                        <span class="font-bold text-blue-300">مرحباً بك في بوابة التفوق والتميز</span>
                     </div>
 
-                    <div class="bg-slate-50 dark:bg-slate-800/80 p-5 rounded-2xl border dark:border-slate-700 space-y-3 shadow-inner">
-                        <label class="block font-bold text-xs text-gray-700 dark:text-gray-300">أدخل كودك الشخصي أو امسح كارت الحضور:</label>
+                    <div class="bg-black/25 dark:bg-slate-900/50 p-5 rounded-2xl border border-white/20 dark:border-slate-700/60 space-y-3 shadow-inner backdrop-blur-sm">
+                        <label class="block font-bold text-xs text-white">أدخل كودك الشخصي أو امسح كارت الحضور:</label>
                         <div class="flex gap-2">
-                            <input type="text" id="portal-code-input" placeholder="مثال: YOSS-101" class="flex-1 px-4 py-2.5 border rounded-xl text-xs uppercase font-mono font-bold bg-white dark:bg-slate-900 text-black dark:text-white border-slate-300 dark:border-slate-700">
-                            <button onclick="loadStudentPortalData()" class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-xl text-xs font-bold transition shadow">استعلام</button>
+                            <input type="text" id="portal-code-input" placeholder="مثال: YOSS-101" class="flex-1 px-4 py-2.5 border rounded-xl text-xs uppercase font-mono font-bold bg-black/30 dark:bg-slate-950/70 text-white placeholder-gray-300 border-white/30 dark:border-slate-700">
+                            <button onclick="loadStudentPortalData()" class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-xl text-xs font-bold transition shadow border border-blue-400/30">استعلام</button>
                         </div>
                         <div class="flex gap-2 pt-1">
-                            <button onclick="startStudentQrScanner()" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white py-2.5 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition">
+                            <button onclick="startStudentQrScanner()" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white py-2.5 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition border border-emerald-400/30">
                                 <i class="fa-solid fa-qrcode"></i> مسح كود الكارنيه (QR) بالكاميرا
                             </button>
                             <button onclick="stopStudentQrScanner()" class="bg-rose-500 hover:bg-rose-600 text-white px-4 py-2.5 rounded-xl text-xs font-bold transition">إغلاق</button>
@@ -186,66 +185,66 @@
                         <div id="portal-financial-alert-banner"></div>
 
                         <div class="grid grid-cols-2 gap-3">
-                            <div class="bg-white dark:bg-slate-800 p-4 rounded-2xl border dark:border-slate-700 shadow-sm">
-                                <span class="text-[11px] text-gray-500 block mb-1">المدفوعات المسجلة:</span>
+                            <div class="bg-black/20 dark:bg-slate-950/40 p-4 rounded-2xl border border-white/20 dark:border-slate-700 shadow-sm backdrop-blur-sm">
+                                <span class="text-[11px] text-gray-300 block mb-1">المدفوعات المسجلة:</span>
                                 <div id="portal-fin-badge"></div>
                             </div>
-                            <div class="bg-white dark:bg-slate-800 p-4 rounded-2xl border dark:border-slate-700 shadow-sm">
-                                <span class="text-[11px] text-gray-500 block mb-1">حصص الحضور المعتمدة:</span>
-                                <span id="portal-att-count" class="font-black text-base text-blue-600 dark:text-blue-400">0 حصة</span>
+                            <div class="bg-black/20 dark:bg-slate-950/40 p-4 rounded-2xl border border-white/20 dark:border-slate-700 shadow-sm backdrop-blur-sm">
+                                <span class="text-[11px] text-gray-300 block mb-1">حصص الحضور المعتمدة:</span>
+                                <span id="portal-att-count" class="font-black text-base text-blue-300">0 حصة</span>
                             </div>
                         </div>
 
-                        <div class="bg-emerald-50/70 dark:bg-slate-800/70 p-4 rounded-2xl border border-emerald-200 dark:border-slate-700 space-y-3">
-                            <h3 class="font-bold text-xs text-emerald-900 dark:text-emerald-300">تسجيل حضور حصة اليوم (متاح دائماً):</h3>
-                            <button onclick="requestAttendanceApproval()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-3 rounded-xl font-bold text-xs shadow transition flex items-center justify-center gap-2">
+                        <div class="bg-emerald-950/40 dark:bg-slate-900/60 p-4 rounded-2xl border border-emerald-500/30 dark:border-slate-700 space-y-3 backdrop-blur-sm">
+                            <h3 class="font-bold text-xs text-emerald-300">تسجيل حضور حصة اليوم (متاح دائماً):</h3>
+                            <button onclick="requestAttendanceApproval()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-3 rounded-xl font-bold text-xs shadow transition flex items-center justify-center gap-2 border border-emerald-400/30">
                                 <i class="fa-solid fa-check-circle"></i> إرسال طلب تسجيل الحضور للمشرف
                             </button>
                             <div id="attendance-alert-box"></div>
                         </div>
 
-                        <div class="bg-indigo-50/70 dark:bg-slate-800/70 p-4 rounded-2xl border border-indigo-200 dark:border-slate-700 space-y-3">
-                            <h3 class="font-bold text-xs text-indigo-900 dark:text-indigo-300">إرسال طلب سداد مصروفات أو مذكرة:</h3>
+                        <div class="bg-indigo-950/40 dark:bg-slate-900/60 p-4 rounded-2xl border border-indigo-500/30 dark:border-slate-700 space-y-3 backdrop-blur-sm">
+                            <h3 class="font-bold text-xs text-indigo-300">إرسال طلب سداد مصروفات أو مذكرة:</h3>
                             <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
-                                <select id="pay-subject" class="px-3 py-2.5 border rounded-xl text-xs bg-white dark:bg-slate-900 text-black dark:text-white border-slate-300 dark:border-slate-700">
-                                    <option value="المحاسبة">المحاسبة</option>
-                                    <option value="إدارة الأعمال">إدارة الأعمال</option>
+                                <select id="pay-subject" class="px-3 py-2.5 border rounded-xl text-xs bg-black/30 dark:bg-slate-950 text-white border-white/30 dark:border-slate-700">
+                                    <option value="المحاسبة" class="text-black">المحاسبة</option>
+                                    <option value="إدارة الأعمال" class="text-black">إدارة الأعمال</option>
                                 </select>
-                                <select id="pay-month" class="px-3 py-2.5 border rounded-xl text-xs bg-white dark:bg-slate-900 text-black dark:text-white border-slate-300 dark:border-slate-700">
-                                    <option value="سبتمبر">سبتمبر</option><option value="أكتوبر">أكتوبر</option><option value="نوفمبر">نوفمبر</option><option value="ديسمبر">ديسمبر</option><option value="يناير">يناير</option><option value="فبراير">فبراير</option><option value="مارس">مارس</option><option value="أبريل">أبريل</option><option value="مايو">مايو</option><option value="يونيو">يونيو</option><option value="يوليو">يوليو</option><option value="أغسطس">أغسطس</option>
+                                <select id="pay-month" class="px-3 py-2.5 border rounded-xl text-xs bg-black/30 dark:bg-slate-950 text-white border-white/30 dark:border-slate-700">
+                                    <option value="سبتمبر" class="text-black">سبتمبر</option><option value="أكتوبر" class="text-black">أكتوبر</option><option value="نوفمبر" class="text-black">نوفمبر</option><option value="ديسمبر" class="text-black">ديسمبر</option><option value="يناير" class="text-black">يناير</option><option value="فبراير" class="text-black">فبراير</option><option value="مارس" class="text-black">مارس</option><option value="أبريل" class="text-black">أبريل</option><option value="مايو" class="text-black">مايو</option><option value="يونيو" class="text-black">يونيو</option><option value="يوليو" class="text-black">يوليو</option><option value="أغسطس" class="text-black">أغسطس</option>
                                 </select>
-                                <input type="number" id="pay-amount" placeholder="المبلغ (ج)" class="px-3 py-2.5 border rounded-xl text-xs bg-white dark:bg-slate-900 text-black dark:text-white border-slate-300 dark:border-slate-700">
+                                <input type="number" id="pay-amount" placeholder="المبلغ (ج)" class="px-3 py-2.5 border rounded-xl text-xs bg-black/30 dark:bg-slate-950 text-white placeholder-gray-300 border-white/30 dark:border-slate-700">
                             </div>
-                            <button onclick="requestPaymentApproval()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-3 rounded-xl font-bold text-xs shadow transition flex items-center justify-center gap-2">
+                            <button onclick="requestPaymentApproval()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-3 rounded-xl font-bold text-xs shadow transition flex items-center justify-center gap-2 border border-indigo-400/30">
                                 <i class="fa-solid fa-paper-plane"></i> إرسال طلب السداد للمشرف (قيد المراجعة)
                             </button>
                             <div id="payment-alert-box"></div>
                         </div>
 
-                        <div class="bg-amber-50/70 dark:bg-slate-800/70 p-4 rounded-2xl border border-amber-200 dark:border-slate-700 space-y-2">
-                            <h4 class="font-bold text-xs text-amber-900 dark:text-amber-300"><i class="fa-solid fa-clock ml-1"></i> متابعة طلباتك المعلقة:</h4>
-                            <div id="student-pending-status-box" class="text-[11px] text-gray-700 dark:text-gray-300 space-y-1">
+                        <div class="bg-amber-950/40 dark:bg-slate-900/60 p-4 rounded-2xl border border-amber-500/30 dark:border-slate-700 space-y-2 backdrop-blur-sm">
+                            <h4 class="font-bold text-xs text-amber-300"><i class="fa-solid fa-clock ml-1"></i> متابعة طلباتك المعلقة:</h4>
+                            <div id="student-pending-status-box" class="text-[11px] text-gray-200 space-y-1">
                                 جاري التحقق من الطلبات...
                             </div>
                         </div>
 
-                        <div class="bg-slate-50 dark:bg-slate-800/70 p-4 rounded-2xl border dark:border-slate-700 space-y-2">
-                            <h4 class="font-bold text-xs text-gray-800 dark:text-gray-200"><i class="fa-solid fa-calendar-days ml-1"></i> جدول مواعيد المجموعات الثابت:</h4>
-                            <div class="text-[11px] text-gray-600 dark:text-gray-300 space-y-1">
+                        <div class="bg-black/20 dark:bg-slate-900/60 p-4 rounded-2xl border border-white/20 dark:border-slate-700 space-y-2 backdrop-blur-sm">
+                            <h4 class="font-bold text-xs text-white"><i class="fa-solid fa-calendar-days ml-1"></i> جدول مواعيد المجموعات الثابت:</h4>
+                            <div class="text-[11px] text-gray-200 space-y-1">
                                 ${scheduleHtml}
                             </div>
                         </div>
 
                         <div class="flex gap-2">
-                            <button onclick="copyStudentCode()" class="flex-1 bg-slate-700 hover:bg-slate-800 text-white py-2.5 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition">
+                            <button onclick="copyStudentCode()" class="flex-1 bg-slate-800/80 hover:bg-slate-800 text-white py-2.5 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition border border-white/20">
                                 <i class="fa-solid fa-copy"></i> نسخ الكود
                             </button>
-                            <button onclick="openStudentCard()" class="flex-1 bg-sky-600 hover:bg-sky-700 text-white py-2.5 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition">
+                            <button onclick="openStudentCard()" class="flex-1 bg-sky-600 hover:bg-sky-700 text-white py-2.5 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition border border-sky-400/30">
                                 <i class="fa-solid fa-id-card"></i> كارت الحضور
                             </button>
                         </div>
                         <div>
-                            <a id="direct-wa-support" href="#" target="_blank" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-3 rounded-xl text-xs font-bold flex items-center justify-center gap-2 shadow transition">
+                            <a id="direct-wa-support" href="#" target="_blank" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-3 rounded-xl text-xs font-bold flex items-center justify-center gap-2 shadow transition border border-emerald-400/30">
                                 <i class="fa-brands fa-whatsapp text-sm"></i> تواصل مباشر مع الإدارة عبر الواتساب
                             </a>
                         </div>
@@ -302,29 +301,29 @@
 
             if (remainingDue > 0) {
                 alertBanner.innerHTML = `
-                    <div class="bg-rose-50 dark:bg-rose-950/50 border border-rose-300 dark:border-rose-800 p-3.5 rounded-2xl flex items-center justify-between text-xs shadow-sm">
+                    <div class="bg-rose-950/60 border border-rose-500/40 p-3.5 rounded-2xl flex items-center justify-between text-xs shadow-sm backdrop-blur-sm">
                         <div class="flex items-center gap-2">
-                            <i class="fa-solid fa-triangle-exclamation text-rose-600 text-base"></i>
+                            <i class="fa-solid fa-triangle-exclamation text-rose-400 text-base"></i>
                             <div>
-                                <span class="font-bold text-rose-800 dark:text-rose-300 block">تنبيه مالي مهم:</span>
-                                <span class="text-rose-700 dark:text-rose-400">عليك مصروفات مستحقة بقيمة <b class="font-black underline">${remainingDue} ج.م</b>، يرجى سرعة سدادها.</span>
+                                <span class="font-bold text-rose-200 block">تنبيه مالي مهم:</span>
+                                <span class="text-rose-300">عليك مصروفات مستحقة بقيمة <b class="font-black underline">${remainingDue} ج.م</b>، يرجى سرعة سدادها.</span>
                             </div>
                         </div>
                     </div>
                 `;
             } else {
                 alertBanner.innerHTML = `
-                    <div class="bg-emerald-50 dark:bg-emerald-950/50 border border-emerald-300 dark:border-emerald-800 p-3.5 rounded-2xl flex items-center justify-between text-xs shadow-sm">
+                    <div class="bg-emerald-950/60 border border-emerald-500/40 p-3.5 rounded-2xl flex items-center justify-between text-xs shadow-sm backdrop-blur-sm">
                         <div class="flex items-center gap-2">
-                            <i class="fa-solid fa-circle-check text-emerald-600 text-base"></i>
-                            <span class="font-bold text-emerald-800 dark:text-emerald-300">حسابك ماليًا مستقر ولا توجد مصروفات متأخرة عليك حالياً.</span>
+                            <i class="fa-solid fa-circle-check text-emerald-400 text-base"></i>
+                            <span class="font-bold text-emerald-200">حسابك ماليًا مستقر ولا توجد مصروفات متأخرة عليك حالياً.</span>
                         </div>
                     </div>
                 `;
             }
 
             const badgeBox = document.getElementById('portal-fin-badge');
-            badgeBox.innerHTML = `<span class="bg-emerald-100 text-emerald-800 dark:bg-emerald-900/60 dark:text-emerald-200 px-2.5 py-1 rounded-lg text-xs font-bold">إجمالي المدفوع (${totalPaid}ج)</span>`;
+            badgeBox.innerHTML = `<span class="bg-emerald-900/80 text-emerald-200 px-2.5 py-1 rounded-lg text-xs font-bold border border-emerald-500/30">إجمالي المدفوع (${totalPaid}ج)</span>`;
 
             let myAtt = approvedAttendance.filter(a => a.code === student.code);
             document.getElementById('portal-att-count').innerText = `${myAtt.length} حصة`;
@@ -342,17 +341,17 @@
 
             let html = "";
             if (pendingAttObj) {
-                html += `<p class="text-amber-600 dark:text-amber-400 font-bold">• طلب تسجيل الحضور: <b>قيد المراجعة ⏳</b></p>`;
+                html += `<p class="text-amber-300 font-bold">• طلب تسجيل الحضور: <b>قيد المراجعة ⏳</b></p>`;
             } else {
-                html += `<p class="text-gray-500">• لا يوجد طلب حضور معلق اليوم.</p>`;
+                html += `<p class="text-gray-300">• لا يوجد طلب حضور معلق اليوم.</p>`;
             }
 
             if (pendingPayList.length > 0) {
                 pendingPayList.forEach(p => {
-                    html += `<p class="text-indigo-600 dark:text-indigo-400 font-bold">• طلب دفع (${p.subject} - ${p.month} بمبلغ ${p.amount}ج): <b>قيد المراجعة ⏳</b></p>`;
+                    html += `<p class="text-indigo-300 font-bold">• طلب دفع (${p.subject} - ${p.month} بمبلغ ${p.amount}ج): <b>قيد المراجعة ⏳</b></p>`;
                 });
             } else {
-                html += `<p class="text-gray-500">• لا توجد طلبات دفع معلقة.</p>`;
+                html += `<p class="text-gray-300">• لا توجد طلبات دفع معلقة.</p>`;
             }
             box.innerHTML = html;
         }
@@ -363,7 +362,7 @@
             const student = students.find(s => s.code.toUpperCase() === code);
             
             if (student.active === false) {
-                alertBox.innerHTML = `<div class="p-2.5 bg-rose-100 text-rose-700 rounded-xl text-xs font-bold">❌ عذراً، كودك موقوف مؤقتاً من الإدارة.</div>`;
+                alertBox.innerHTML = `<div class="p-2.5 bg-rose-900/80 text-rose-200 rounded-xl text-xs font-bold">❌ عذراً، كودك موقوف مؤقتاً من الإدارة.</div>`;
                 return;
             }
 
@@ -372,17 +371,17 @@
             const alreadyPending = pendingAttendance.some(a => a.code === student.code);
 
             if(alreadyAttended) {
-                alertBox.innerHTML = `<div class="p-2.5 bg-blue-100 text-blue-700 rounded-xl text-xs font-bold">ℹ️ تم قبول حضورك مسبقاً اليوم.</div>`;
+                alertBox.innerHTML = `<div class="p-2.5 bg-blue-900/80 text-blue-200 rounded-xl text-xs font-bold">ℹ️ تم قبول حضورك مسبقاً اليوم.</div>`;
                 return;
             }
             if(alreadyPending) {
-                alertBox.innerHTML = `<div class="p-2.5 bg-amber-100 text-amber-800 rounded-xl text-xs font-bold">⏳ طلب حضورك مسجل مسبقاً وهو قيد المراجعة لدى المشرف.</div>`;
+                alertBox.innerHTML = `<div class="p-2.5 bg-amber-900/80 text-amber-200 rounded-xl text-xs font-bold">⏳ طلب حضورك مسجل مسبقاً وهو قيد المراجعة لدى المشرف.</div>`;
                 return;
             }
 
             pendingAttendance.push({ name: student.name, code: student.code, date: new Date().toLocaleString('ar-EG') });
             saveLocal();
-            alertBox.innerHTML = `<div class="p-2.5 bg-amber-100 text-amber-800 rounded-xl text-xs font-bold">⏳ تم إرسال طلب الحضور بنجاح وهو الآن (قيد المراجعة).</div>`;
+            alertBox.innerHTML = `<div class="p-2.5 bg-amber-900/80 text-amber-200 rounded-xl text-xs font-bold">⏳ تم إرسال طلب الحضور بنجاح وهو الآن (قيد المراجعة).</div>`;
             updateStudentPendingView(student.code);
         }
 
@@ -399,7 +398,7 @@
             pendingPayments.push({ name: student.name, code: student.code, subject, month, amount, date: new Date().toLocaleString('ar-EG') });
             saveLocal();
 
-            alertBox.innerHTML = `<div class="p-2.5 bg-indigo-100 text-indigo-800 rounded-xl text-xs font-bold">⏳ تم إرسال طلب السداد للمشرف وهو (قيد المراجعة).</div>`;
+            alertBox.innerHTML = `<div class="p-2.5 bg-indigo-900/80 text-indigo-200 rounded-xl text-xs font-bold">⏳ تم إرسال طلب السداد للمشرف وهو (قيد المراجعة).</div>`;
             updateStudentPendingView(student.code);
         }
 
@@ -419,59 +418,59 @@
         function renderAdminView() {
             const container = document.getElementById('main-container');
 
-            let studentOptionsHtml = `<option value="ALL">📢 فرض على جميع الطلاب (عام)</option>`;
+            let studentOptionsHtml = `<option value="ALL" class="text-black">📢 فرض على جميع الطلاب (عام)</option>`;
             students.forEach(st => {
-                studentOptionsHtml += `<option value="${st.code}">${st.name} (${st.code})</option>`;
+                studentOptionsHtml += `<option value="${st.code}" class="text-black">${st.name} (${st.code})</option>`;
             });
 
             container.innerHTML = `
                 <div class="space-y-6 text-right">
                     <!-- لوحة المؤشرات السريعة -->
                     <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
-                        <div class="bg-blue-50 dark:bg-slate-800 p-4 rounded-2xl border dark:border-slate-700 shadow-sm text-center">
-                            <span class="text-xs text-gray-500 block mb-1">إجمالي الطلاب</span>
-                            <span class="text-xl font-black text-blue-600 dark:text-blue-400">${students.length}</span>
+                        <div class="bg-black/20 dark:bg-slate-900/50 p-4 rounded-2xl border border-white/20 dark:border-slate-700 shadow-sm text-center backdrop-blur-sm">
+                            <span class="text-xs text-gray-300 block mb-1">إجمالي الطلاب</span>
+                            <span class="text-xl font-black text-blue-300">${students.length}</span>
                         </div>
-                        <div class="bg-amber-50 dark:bg-slate-800 p-4 rounded-2xl border dark:border-slate-700 shadow-sm text-center">
-                            <span class="text-xs text-gray-500 block mb-1">طلبات الحضور المعلقة</span>
-                            <span class="text-xl font-black text-amber-600 dark:text-amber-400">${pendingAttendance.length}</span>
+                        <div class="bg-black/20 dark:bg-slate-900/50 p-4 rounded-2xl border border-white/20 dark:border-slate-700 shadow-sm text-center backdrop-blur-sm">
+                            <span class="text-xs text-gray-300 block mb-1">طلبات الحضور المعلقة</span>
+                            <span class="text-xl font-black text-amber-300">${pendingAttendance.length}</span>
                         </div>
-                        <div class="bg-indigo-50 dark:bg-slate-800 p-4 rounded-2xl border dark:border-slate-700 shadow-sm text-center">
-                            <span class="text-xs text-gray-500 block mb-1">طلبات الدفع المعلقة</span>
-                            <span class="text-xl font-black text-indigo-600 dark:text-indigo-400">${pendingPayments.length}</span>
+                        <div class="bg-black/20 dark:bg-slate-900/50 p-4 rounded-2xl border border-white/20 dark:border-slate-700 shadow-sm text-center backdrop-blur-sm">
+                            <span class="text-xs text-gray-300 block mb-1">طلبات الدفع المعلقة</span>
+                            <span class="text-xl font-black text-indigo-300">${pendingPayments.length}</span>
                         </div>
-                        <div class="bg-emerald-50 dark:bg-slate-800 p-4 rounded-2xl border dark:border-slate-700 shadow-sm text-center">
-                            <span class="text-xs text-gray-500 block mb-1">إجمالي الحصص المعتمدة</span>
-                            <span class="text-xl font-black text-emerald-600 dark:text-emerald-400">${approvedAttendance.length}</span>
+                        <div class="bg-black/20 dark:bg-slate-900/50 p-4 rounded-2xl border border-white/20 dark:border-slate-700 shadow-sm text-center backdrop-blur-sm">
+                            <span class="text-xs text-gray-300 block mb-1">إجمالي الحصص المعتمدة</span>
+                            <span class="text-xl font-black text-emerald-300">${approvedAttendance.length}</span>
                         </div>
                     </div>
 
                     <!-- أزرار الإجراءات السريعة وتصدير التقارير وتصفير الحساب -->
-                    <div class="flex flex-wrap gap-2 justify-between items-center bg-slate-50 dark:bg-slate-800/80 p-4 rounded-2xl border dark:border-slate-700">
+                    <div class="flex flex-wrap gap-2 justify-between items-center bg-black/20 dark:bg-slate-900/50 p-4 rounded-2xl border border-white/20 dark:border-slate-700 backdrop-blur-sm">
                         <div class="flex gap-2">
-                            <button onclick="exportFinancialReport()" class="bg-sky-600 hover:bg-sky-700 text-white px-4 py-2.5 rounded-xl text-xs font-bold flex items-center gap-1.5 transition">
+                            <button onclick="exportFinancialReport()" class="bg-sky-600 hover:bg-sky-700 text-white px-4 py-2.5 rounded-xl text-xs font-bold flex items-center gap-1.5 transition border border-sky-400/30">
                                 <i class="fa-solid fa-file-excel"></i> تصدير وطباعة التقرير المالي
                             </button>
-                            <button onclick="exportStudentsReport()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-xl text-xs font-bold flex items-center gap-1.5 transition">
+                            <button onclick="exportStudentsReport()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-xl text-xs font-bold flex items-center gap-1.5 transition border border-blue-400/30">
                                 <i class="fa-solid fa-users-rectangle"></i> تقرير الطلاب الكلي
                             </button>
                         </div>
-                        <button onclick="resetSystemData()" class="bg-rose-600 hover:bg-rose-700 text-white px-4 py-2.5 rounded-xl text-xs font-bold flex items-center gap-1.5 transition">
+                        <button onclick="resetSystemData()" class="bg-rose-600 hover:bg-rose-700 text-white px-4 py-2.5 rounded-xl text-xs font-bold flex items-center gap-1.5 transition border border-rose-400/30">
                             <i class="fa-solid fa-triangle-exclamation"></i> تصفير جميع البيانات
                         </button>
                     </div>
 
                     <!-- الطلبات المعلقة (حضور ودفع) -->
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div class="bg-slate-50 dark:bg-slate-800/80 p-4 rounded-2xl border dark:border-slate-700 space-y-3">
-                            <h3 class="font-bold text-xs text-amber-700 dark:text-amber-400 flex items-center gap-1.5">
+                        <div class="bg-black/20 dark:bg-slate-900/50 p-4 rounded-2xl border border-white/20 dark:border-slate-700 space-y-3 backdrop-blur-sm">
+                            <h3 class="font-bold text-xs text-amber-300 flex items-center gap-1.5">
                                 <i class="fa-solid fa-bell"></i> طلبات الحضور المعلقة (${pendingAttendance.length})
                             </h3>
                             <div id="admin-pending-att-list" class="space-y-2 max-h-48 overflow-y-auto text-xs"></div>
                         </div>
 
-                        <div class="bg-slate-50 dark:bg-slate-800/80 p-4 rounded-2xl border dark:border-slate-700 space-y-3">
-                            <h3 class="font-bold text-xs text-indigo-700 dark:text-indigo-400 flex items-center gap-1.5">
+                        <div class="bg-black/20 dark:bg-slate-900/50 p-4 rounded-2xl border border-white/20 dark:border-slate-700 space-y-3 backdrop-blur-sm">
+                            <h3 class="font-bold text-xs text-indigo-300 flex items-center gap-1.5">
                                 <i class="fa-solid fa-money-check-dollar"></i> طلبات السداد المعلقة (${pendingPayments.length})
                             </h3>
                             <div id="admin-pending-pay-list" class="space-y-2 max-h-48 overflow-y-auto text-xs"></div>
@@ -479,76 +478,76 @@
                     </div>
 
                     <!-- قسم تحميل مصاريف الاشتراك على الطلاب -->
-                    <div class="bg-slate-50 dark:bg-slate-800/80 p-5 rounded-2xl border dark:border-slate-700 space-y-3">
-                        <h3 class="font-bold text-xs text-indigo-700 dark:text-indigo-400"><i class="fa-solid fa-file-invoice-dollar ml-1"></i> فرض وتحميل مصاريف الاشتراك الشهري أو المذكرة على الطلاب:</h3>
+                    <div class="bg-black/20 dark:bg-slate-900/50 p-5 rounded-2xl border border-white/20 dark:border-slate-700 space-y-3 backdrop-blur-sm">
+                        <h3 class="font-bold text-xs text-indigo-300"><i class="fa-solid fa-file-invoice-dollar ml-1"></i> فرض وتحميل مصاريف الاشتراك الشهري أو المذكرة على الطلاب:</h3>
                         <div class="grid grid-cols-1 md:grid-cols-4 gap-2">
-                            <select id="due-student-code" class="px-3 py-2.5 border rounded-xl text-xs bg-white dark:bg-slate-900 text-black dark:text-white border-slate-300 dark:border-slate-700">
+                            <select id="due-student-code" class="px-3 py-2.5 border rounded-xl text-xs bg-black/30 dark:bg-slate-950 text-white border-white/30 dark:border-slate-700">
                                 ${studentOptionsHtml}
                             </select>
-                            <input type="text" id="due-title" placeholder="بند المصروف (مثال: اشتراك شهر أكتوبر / مذكرة المحاسبة)" class="px-3 py-2.5 border rounded-xl text-xs bg-white dark:bg-slate-900 text-black dark:text-white border-slate-300 dark:border-slate-700">
-                            <input type="number" id="due-amount" placeholder="المبلغ المطلوب (ج)" class="px-3 py-2.5 border rounded-xl text-xs bg-white dark:bg-slate-900 text-black dark:text-white border-slate-300 dark:border-slate-700">
-                            <button onclick="addStudentDue()" class="bg-indigo-600 hover:bg-indigo-700 text-white py-2.5 rounded-xl font-bold text-xs shadow transition">تحميل المطالبة المالية</button>
+                            <input type="text" id="due-title" placeholder="بند المصروف (مثال: اشتراك شهر أكتوبر / مذكرة المحاسبة)" class="px-3 py-2.5 border rounded-xl text-xs bg-black/30 dark:bg-slate-950 text-white placeholder-gray-300 border-white/30 dark:border-slate-700">
+                            <input type="number" id="due-amount" placeholder="المبلغ المطلوب (ج)" class="px-3 py-2.5 border rounded-xl text-xs bg-black/30 dark:bg-slate-950 text-white placeholder-gray-300 border-white/30 dark:border-slate-700">
+                            <button onclick="addStudentDue()" class="bg-indigo-600 hover:bg-indigo-700 text-white py-2.5 rounded-xl font-bold text-xs shadow transition border border-indigo-400/30">تحميل المطالبة المالية</button>
                         </div>
                     </div>
 
                     <!-- إدارة مواعيد المجموعات -->
-                    <div class="bg-slate-50 dark:bg-slate-800/80 p-5 rounded-2xl border dark:border-slate-700 space-y-3">
-                        <h3 class="font-bold text-xs text-purple-700 dark:text-purple-400"><i class="fa-solid fa-calendar-days ml-1"></i> إدارة وتعديل مواعيد الحصص الأسبوعية:</h3>
+                    <div class="bg-black/20 dark:bg-slate-900/50 p-5 rounded-2xl border border-white/20 dark:border-slate-700 space-y-3 backdrop-blur-sm">
+                        <h3 class="font-bold text-xs text-purple-300"><i class="fa-solid fa-calendar-days ml-1"></i> إدارة وتعديل مواعيد الحصص الأسبوعية:</h3>
                         <div class="grid grid-cols-1 md:grid-cols-4 gap-2">
-                            <input type="text" id="sch-subject" placeholder="اسم المادة (محاسبة/إدارة)" class="px-3 py-2.5 border rounded-xl text-xs bg-white dark:bg-slate-900 text-black dark:text-white border-slate-300 dark:border-slate-700">
-                            <input type="text" id="sch-days" placeholder="الأيام (مثال: السبت والأربعاء)" class="px-3 py-2.5 border rounded-xl text-xs bg-white dark:bg-slate-900 text-black dark:text-white border-slate-300 dark:border-slate-700">
-                            <input type="text" id="sch-time" placeholder="الوقت (مثال: 2:00 ظهراً)" class="px-3 py-2.5 border rounded-xl text-xs bg-white dark:bg-slate-900 text-black dark:text-white border-slate-300 dark:border-slate-700">
-                            <button onclick="addSchedule()" class="bg-purple-600 hover:bg-purple-700 text-white py-2.5 rounded-xl font-bold text-xs shadow transition">إضافة موعد جديد</button>
+                            <input type="text" id="sch-subject" placeholder="اسم المادة (محاسبة/إدارة)" class="px-3 py-2.5 border rounded-xl text-xs bg-black/30 dark:bg-slate-950 text-white placeholder-gray-300 border-white/30 dark:border-slate-700">
+                            <input type="text" id="sch-days" placeholder="الأيام (مثال: السبت والأربعاء)" class="px-3 py-2.5 border rounded-xl text-xs bg-black/30 dark:bg-slate-950 text-white placeholder-gray-300 border-white/30 dark:border-slate-700">
+                            <input type="text" id="sch-time" placeholder="الوقت (مثال: 2:00 ظهراً)" class="px-3 py-2.5 border rounded-xl text-xs bg-black/30 dark:bg-slate-950 text-white placeholder-gray-300 border-white/30 dark:border-slate-700">
+                            <button onclick="addSchedule()" class="bg-purple-600 hover:bg-purple-700 text-white py-2.5 rounded-xl font-bold text-xs shadow transition border border-purple-400/30">إضافة موعد جديد</button>
                         </div>
                         <div id="admin-schedules-list" class="space-y-2 pt-2 text-xs"></div>
                     </div>
 
                     <!-- إضافة طالب جديد -->
-                    <div class="bg-slate-50 dark:bg-slate-800/80 p-5 rounded-2xl border dark:border-slate-700 space-y-3">
-                        <h3 class="font-bold text-xs text-blue-700 dark:text-blue-400"><i class="fa-solid fa-user-plus ml-1"></i> تسجيل طالب جديد وتوليد كود تلقائي:</h3>
+                    <div class="bg-black/20 dark:bg-slate-900/50 p-5 rounded-2xl border border-white/20 dark:border-slate-700 space-y-3 backdrop-blur-sm">
+                        <h3 class="font-bold text-xs text-blue-300"><i class="fa-solid fa-user-plus ml-1"></i> تسجيل طالب جديد وتوليد كود تلقائي:</h3>
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
-                            <input type="text" id="new-student-name" placeholder="اسم الطالب الرباعي" class="px-3 py-2.5 border rounded-xl text-xs bg-white dark:bg-slate-900 text-black dark:text-white border-slate-300 dark:border-slate-700">
-                            <input type="text" id="new-student-phone" placeholder="رقم هاتف الطالب / ولي الأمر" class="px-3 py-2.5 border rounded-xl text-xs bg-white dark:bg-slate-900 text-black dark:text-white border-slate-300 dark:border-slate-700">
-                            <button onclick="addNewStudent()" class="bg-blue-600 hover:bg-blue-700 text-white py-2.5 rounded-xl font-bold text-xs shadow transition">إضافة الطالب وتوليد الكود</button>
+                            <input type="text" id="new-student-name" placeholder="اسم الطالب الرباعي" class="px-3 py-2.5 border rounded-xl text-xs bg-black/30 dark:bg-slate-950 text-white placeholder-gray-300 border-white/30 dark:border-slate-700">
+                            <input type="text" id="new-student-phone" placeholder="رقم هاتف الطالب / ولي الأمر" class="px-3 py-2.5 border rounded-xl text-xs bg-black/30 dark:bg-slate-950 text-white placeholder-gray-300 border-white/30 dark:border-slate-700">
+                            <button onclick="addNewStudent()" class="bg-blue-600 hover:bg-blue-700 text-white py-2.5 rounded-xl font-bold text-xs shadow transition border border-blue-400/30">إضافة الطالب وتوليد الكود</button>
                         </div>
                     </div>
 
                     <!-- إدارة وعرض الطلاب -->
-                    <div class="bg-slate-50 dark:bg-slate-800/80 p-5 rounded-2xl border dark:border-slate-700 space-y-3">
+                    <div class="bg-black/20 dark:bg-slate-900/50 p-5 rounded-2xl border border-white/20 dark:border-slate-700 space-y-3 backdrop-blur-sm">
                         <div class="flex justify-between items-center">
-                            <h3 class="font-bold text-xs text-gray-800 dark:text-gray-200"><i class="fa-solid fa-users ml-1"></i> قائمة الطلاب المسجلين</h3>
-                            <input type="text" id="admin-search-student" onkeyup="renderAdminStudentsTable()" placeholder="ابحث بالاسم أو الكود..." class="px-3 py-1.5 border rounded-xl text-xs bg-white dark:bg-slate-900 text-black dark:text-white border-slate-300 dark:border-slate-700 w-48">
+                            <h3 class="font-bold text-xs text-white"><i class="fa-solid fa-users ml-1"></i> قائمة الطلاب المسجلين</h3>
+                            <input type="text" id="admin-search-student" onkeyup="renderAdminStudentsTable()" placeholder="ابحث بالاسم أو الكود..." class="px-3 py-1.5 border rounded-xl text-xs bg-black/30 dark:bg-slate-950 text-white placeholder-gray-300 border-white/30 dark:border-slate-700 w-48">
                         </div>
                         <div class="overflow-x-auto max-h-64">
                             <table class="w-full text-right text-xs">
-                                <thead class="bg-gray-100 dark:bg-slate-900 sticky top-0">
+                                <thead class="bg-black/40 dark:bg-slate-950 sticky top-0">
                                     <tr>
-                                        <th class="p-2.5">الكود</th>
-                                        <th class="p-2.5">الاسم</th>
-                                        <th class="p-2.5">الهاتف</th>
-                                        <th class="p-2.5">الحالة</th>
-                                        <th class="p-2.5 text-center">الإجراءات</th>
+                                        <th class="p-2.5 text-white">الكود</th>
+                                        <th class="p-2.5 text-white">الاسم</th>
+                                        <th class="p-2.5 text-white">الهاتف</th>
+                                        <th class="p-2.5 text-white">الحالة</th>
+                                        <th class="p-2.5 text-center text-white">الإجراءات</th>
                                     </tr>
                                 </thead>
-                                <tbody id="admin-students-table-body" class="divide-y divide-gray-200 dark:divide-slate-700"></tbody>
+                                <tbody id="admin-students-table-body" class="divide-y divide-white/10 dark:divide-slate-700"></tbody>
                             </table>
                         </div>
                     </div>
 
                     <!-- قسم إدارة المصروفات وإيرادات الخزينة -->
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div class="bg-slate-50 dark:bg-slate-800/80 p-5 rounded-2xl border dark:border-slate-700 space-y-3">
-                            <h3 class="font-bold text-xs text-emerald-700 dark:text-emerald-400"><i class="fa-solid fa-wallet ml-1"></i> تسجيل مصروفات السنتر أو المذكرات التشغيلية:</h3>
+                        <div class="bg-black/20 dark:bg-slate-900/50 p-5 rounded-2xl border border-white/20 dark:border-slate-700 space-y-3 backdrop-blur-sm">
+                            <h3 class="font-bold text-xs text-emerald-300"><i class="fa-solid fa-wallet ml-1"></i> تسجيل مصروفات السنتر أو المذكرات التشغيلية:</h3>
                             <div class="space-y-2">
-                                <input type="text" id="expense-title" placeholder="بند المصروف (مثال: طباعة مذكرات، إيجار)" class="w-full px-3 py-2.5 border rounded-xl text-xs bg-white dark:bg-slate-900 text-black dark:text-white border-slate-300 dark:border-slate-700">
-                                <input type="number" id="expense-amount" placeholder="المبلغ (ج)" class="w-full px-3 py-2.5 border rounded-xl text-xs bg-white dark:bg-slate-900 text-black dark:text-white border-slate-300 dark:border-slate-700">
-                                <button onclick="addExpense()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-2.5 rounded-xl font-bold text-xs shadow transition">إضافة المصروف</button>
+                                <input type="text" id="expense-title" placeholder="بند المصروف (مثال: طباعة مذكرات، إيجار)" class="w-full px-3 py-2.5 border rounded-xl text-xs bg-black/30 dark:bg-slate-950 text-white placeholder-gray-300 border-white/30 dark:border-slate-700">
+                                <input type="number" id="expense-amount" placeholder="المبلغ (ج)" class="w-full px-3 py-2.5 border rounded-xl text-xs bg-black/30 dark:bg-slate-950 text-white placeholder-gray-300 border-white/30 dark:border-slate-700">
+                                <button onclick="addExpense()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-2.5 rounded-xl font-bold text-xs shadow transition border border-emerald-400/30">إضافة المصروف</button>
                             </div>
                         </div>
 
-                        <div class="bg-slate-50 dark:bg-slate-800/80 p-5 rounded-2xl border dark:border-slate-700 space-y-3">
-                            <h3 class="font-bold text-xs text-blue-700 dark:text-blue-400"><i class="fa-solid fa-chart-line ml-1"></i> الخزينة والملخص المالي:</h3>
-                            <div id="financial-summary-box" class="text-xs space-y-2 text-gray-700 dark:text-gray-300"></div>
+                        <div class="bg-black/20 dark:bg-slate-900/50 p-5 rounded-2xl border border-white/20 dark:border-slate-700 space-y-3 backdrop-blur-sm">
+                            <h3 class="font-bold text-xs text-blue-300"><i class="fa-solid fa-chart-line ml-1"></i> الخزينة والملخص المالي:</h3>
+                            <div id="financial-summary-box" class="text-xs space-y-2 text-gray-200"></div>
                         </div>
                     </div>
                 </div>
@@ -568,10 +567,10 @@
                 let html = '';
                 pendingAttendance.forEach((item, index) => {
                     html += `
-                        <div class="bg-white dark:bg-slate-900 p-3 rounded-xl border dark:border-slate-700 flex justify-between items-center">
+                        <div class="bg-black/30 dark:bg-slate-950 p-3 rounded-xl border border-white/10 dark:border-slate-700 flex justify-between items-center">
                             <div>
-                                <span class="font-bold text-gray-900 dark:text-white">${item.name}</span>
-                                <span class="text-[10px] text-gray-500 font-mono block">كود: ${item.code} | ${item.date}</span>
+                                <span class="font-bold text-white">${item.name}</span>
+                                <span class="text-[10px] text-gray-300 font-mono block">كود: ${item.code} | ${item.date}</span>
                             </div>
                             <div class="flex gap-1.5">
                                 <button onclick="approveAttendance(${index})" class="bg-emerald-600 text-white px-3 py-1.5 rounded-lg text-[11px] font-bold">موافقة</button>
@@ -591,10 +590,10 @@
                 let html = '';
                 pendingPayments.forEach((item, index) => {
                     html += `
-                        <div class="bg-white dark:bg-slate-900 p-3 rounded-xl border dark:border-slate-700 flex justify-between items-center">
+                        <div class="bg-black/30 dark:bg-slate-950 p-3 rounded-xl border border-white/10 dark:border-slate-700 flex justify-between items-center">
                             <div>
-                                <span class="font-bold text-gray-900 dark:text-white">${item.name}</span>
-                                <span class="text-[10px] text-indigo-600 dark:text-indigo-400 block">${item.subject} - شهر ${item.month} (${item.amount}ج)</span>
+                                <span class="font-bold text-white">${item.name}</span>
+                                <span class="text-[10px] text-indigo-300 block">${item.subject} - شهر ${item.month} (${item.amount}ج)</span>
                             </div>
                             <div class="flex gap-1.5">
                                 <button onclick="approvePayment(${index})" class="bg-emerald-600 text-white px-3 py-1.5 rounded-lg text-[11px] font-bold">قبول السداد</button>
@@ -629,7 +628,6 @@
             loadAdminPendingLists();
             renderFinancialSummary();
 
-            // إرسال رسالة واتساب للطالب بقبول السداد تلقائياً
             let st = students.find(s => s.code === item.code);
             if (st && st.phone && st.phone !== "غير محدد") {
                 let cleanPhone = st.phone.startsWith('0') ? '2' + st.phone : st.phone;
@@ -680,7 +678,7 @@
             let html = "";
             schedules.forEach((sch, idx) => {
                 html += `
-                    <div class="flex justify-between items-center bg-white dark:bg-slate-900 p-2.5 rounded-xl border dark:border-slate-700">
+                    <div class="flex justify-between items-center bg-black/30 dark:bg-slate-950 p-2.5 rounded-xl border border-white/10 dark:border-slate-700">
                         <span><b>${sch.subject}:</b> ${sch.days} (${sch.time})</span>
                         <button onclick="deleteSchedule(${idx})" class="bg-rose-500 text-white px-2.5 py-1 rounded-lg text-[10px] font-bold">حذف</button>
                     </div>
@@ -721,17 +719,17 @@
             let netProfit = totalIncome - totalExpenses;
 
             box.innerHTML = `
-                <div class="flex justify-between p-2.5 bg-white dark:bg-slate-900 rounded-xl border dark:border-slate-700">
+                <div class="flex justify-between p-2.5 bg-black/30 dark:bg-slate-950 rounded-xl border border-white/10 dark:border-slate-700">
                     <span>إجمالي الإيرادات المحصلة:</span>
-                    <span class="font-bold text-emerald-600">${totalIncome} ج.م</span>
+                    <span class="font-bold text-emerald-400">${totalIncome} ج.م</span>
                 </div>
-                <div class="flex justify-between p-2.5 bg-white dark:bg-slate-900 rounded-xl border dark:border-slate-700">
+                <div class="flex justify-between p-2.5 bg-black/30 dark:bg-slate-950 rounded-xl border border-white/10 dark:border-slate-700">
                     <span>إجمالي المصروفات والطباعة:</span>
-                    <span class="font-bold text-rose-600">${totalExpenses} ج.م</span>
+                    <span class="font-bold text-rose-400">${totalExpenses} ج.م</span>
                 </div>
-                <div class="flex justify-between p-2.5 bg-blue-50 dark:bg-slate-900 rounded-xl border border-blue-200 dark:border-slate-700 font-bold">
+                <div class="flex justify-between p-2.5 bg-blue-950/50 dark:bg-slate-950 rounded-xl border border-blue-400/30 dark:border-slate-700 font-bold">
                     <span>صافي الخزينة:</span>
-                    <span class="text-blue-600 dark:text-blue-400">${netProfit} ج.م</span>
+                    <span class="text-blue-300">${netProfit} ج.م</span>
                 </div>
             `;
         }
@@ -774,12 +772,12 @@
                 }
 
                 html += `
-                    <tr class="hover:bg-gray-50 dark:hover:bg-slate-900/50">
-                        <td class="p-2.5 font-mono font-bold text-blue-600 dark:text-blue-400">${st.code}</td>
+                    <tr class="hover:bg-white/5 dark:hover:bg-slate-900/50">
+                        <td class="p-2.5 font-mono font-bold text-blue-300">${st.code}</td>
                         <td class="p-2.5 font-bold">${st.name}</td>
                         <td class="p-2.5 font-mono">${st.phone}</td>
                         <td class="p-2.5">
-                            <span class="px-2 py-0.5 rounded text-[10px] font-bold ${st.active !== false ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/60 dark:text-emerald-200' : 'bg-rose-100 text-rose-800 dark:bg-rose-900/60 dark:text-rose-200'}">
+                            <span class="px-2 py-0.5 rounded text-[10px] font-bold ${st.active !== false ? 'bg-emerald-900/80 text-emerald-200 border border-emerald-500/30' : 'bg-rose-900/80 text-rose-200 border border-rose-500/30'}">
                                 ${st.active !== false ? 'نشط' : 'موقف'}
                             </span>
                         </td>
